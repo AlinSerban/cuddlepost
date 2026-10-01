@@ -1,5 +1,6 @@
 import type { BrandId } from '../brand'
 import type { Gift, GiftDraft, GiftStatus } from '../gift'
+import { giftExpiresAt } from '../gift'
 
 export interface StoredGift extends Gift {
   senderEmail: string
@@ -47,6 +48,7 @@ export function publicGiftView(gift: StoredGift): Gift {
     occasion: gift.occasion,
     hasVoice: gift.hasVoice,
     createdAt: gift.createdAt,
+    expiresAt: gift.expiresAt || giftExpiresAt(gift.createdAt),
     status: gift.status,
   }
 }

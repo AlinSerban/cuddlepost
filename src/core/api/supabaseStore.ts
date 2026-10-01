@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { draftToGift, newGiftId } from '../gift'
+import { draftToGift, giftExpiresAt, newGiftId } from '../gift'
 import type { FinalizePaymentInput, GiftStore, StoredGift } from './types'
 import { newManageToken } from './types'
 
@@ -24,10 +24,12 @@ interface GiftRow {
   manage_token: string
   status: StoredGift['status']
   created_at: string
+  expires_at: string | null
   deleted_at: string | null
 }
 
 function rowToGift(row: GiftRow): StoredGift {
+  const createdAt = new Date(row.created_at).getTime()
   return {
     id: row.id,
     brand: row.brand,
@@ -48,7 +50,8 @@ function rowToGift(row: GiftRow): StoredGift {
     paymentProvider: row.payment_provider,
     manageToken: row.manage_token,
     status: row.status,
-    createdAt: new Date(row.created_at).getTime(),
+    createdAt,
+    expiresAt: row.expires_at ? new Date(row.expires_at).getTime() : giftExpiresAt(createdAt),
   }
 }
 
@@ -147,6 +150,7 @@ export function createSupabaseStore(): GiftStore {
         payment_provider: input.paymentProvider,
         manage_token: manageToken,
         status: 'paid' as const,
+        expires_at: new Date(gift.expiresAt).toISOString(),
       }
 
       const { data, error } = await sb.from('gifts').insert(row).select('*').single()
@@ -159,7 +163,7 @@ export function createSupabaseStore(): GiftStore {
       const { data, error } = await sb
         .from('gifts')
         .select(
-          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,voice_path,delivery,payment_id,payment_provider,status,created_at,deleted_at',
+          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,voice_path,delivery,payment_id,payment_provider,status,created_at,expires_at,deleted_at',
         )
         .eq('id', id)
         .eq('status', 'paid')

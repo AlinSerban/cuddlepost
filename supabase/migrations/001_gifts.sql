@@ -25,6 +25,7 @@ create table if not exists public.gifts (
   status text not null default 'paid'
     check (status in ('pending_payment', 'paid', 'reported', 'deleted')),
   created_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '72 hours'),
   deleted_at timestamptz
 );
 

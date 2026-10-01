@@ -2,7 +2,7 @@ import { getGiftStore, MAX_VOICE_BYTES, type StoredGift } from './api'
 import type { BrandId } from './brand'
 import { sendGiftEmail } from './email'
 import type { Gift, GiftDraft } from './gift'
-import { giftUrl } from './gift'
+import { giftExpiresAt, giftUrl } from './gift'
 import { processPayment, type PaymentResult } from './payment'
 
 export type { PaymentResult }
@@ -128,6 +128,7 @@ export function toPublicGift(gift: StoredGift): Gift {
     occasion: gift.occasion,
     hasVoice: gift.hasVoice,
     createdAt: gift.createdAt,
+    expiresAt: gift.expiresAt || giftExpiresAt(gift.createdAt),
     status: gift.status,
   }
 }

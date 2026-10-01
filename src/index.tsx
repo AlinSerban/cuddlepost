@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { PLUSH_TYPES, PRICE, type Gift } from './core/gift'
+import { PLUSH_TYPES, PRICE, GIFT_TTL_HOURS, isGiftExpired, type Gift } from './core/gift'
 import { copyText, useGiftById, useGiftFlow } from './core/flow'
 import { isStandalone, Keepsake, useHomeScreenSetup } from './core/keepsake'
 import { PlushViewer } from './core/plushie/PlushViewer'
@@ -191,10 +191,11 @@ export function Landing() {
       <section className="v3-section v3-faq">
         <h2>Good questions</h2>
         {[
-          ['Is it a physical toy?', "It's a digital 3D plushie — they can turn it, squeeze it and keep it for years. No shipping costs, nothing lost in the post."],
+          ['Is it a physical toy?', "It's a digital 3D plushie — they can turn it, squeeze it and keep a screenshot forever. No shipping costs, nothing lost in the post."],
           ['What do they need to open it?', 'Just a phone or computer with a browser. No app, no account.'],
           ['Can I add my voice?', 'Yes, up to a minute. Perfect for grandparents and little ones who love hearing you.'],
-          ['What if they lose the link?', 'You get a copy by email, plus a QR code you can print and pop in a card.'],
+          ['How long does the link last?', `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that the link expires — so share it while it's fresh.`],
+          ['What if they lose the link?', 'You get a copy by email (when email is on), plus a QR code you can print and pop in a card. Share it within a few days.'],
         ].map(([q, a]) => (
           <details key={q}>
             <summary>{q}</summary>
@@ -261,6 +262,9 @@ export function Sent() {
               {copied ? 'Copied' : 'Copy link'}
             </button>
           </div>
+          <p className="v3-hand v3-hand-sm" style={{ marginTop: '0.75rem' }}>
+            This link works for {GIFT_TTL_HOURS / 24} days — share it soon.
+          </p>
           <div className="v3-label-qr">
             <QrCode value={url} dark="#3b2f2a" light="#fffaf1" size={130} />
             <p className="v3-hand v3-hand-sm">print me & tuck me into a card</p>
@@ -291,6 +295,7 @@ export function Gift() {
   useHomeScreenSetup(gift ?? null, cuddlepostKeepsake)
   if (loading) return <Opening />
   if (!gift) return <Missing />
+  if (isGiftExpired(gift)) return <Expired />
 
   const unwrap = () => {
     setStage('opening')
@@ -371,6 +376,21 @@ function Missing() {
         <h1>This parcel went astray.</h1>
         <Link to="/" className="v3-btn">
           Back to the workshop
+        </Link>
+      </main>
+    </div>
+  )
+}
+
+function Expired() {
+  return (
+    <div className="pg-theme v3 v3-gift">
+      <main className="v3-gift-intro">
+        <span className="v3-hand">too late for this post</span>
+        <h1>This parcel has expired.</h1>
+        <p>Gift links stay open for {GIFT_TTL_HOURS / 24} days, then the page closes.</p>
+        <Link to="/" className="v3-btn">
+          Stitch a new one
         </Link>
       </main>
     </div>

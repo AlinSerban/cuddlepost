@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import type { BrandId } from './brand'
-import { createDraft, giftPath, giftUrl, validateDraft, type Gift, type GiftDraft } from './gift'
+import { createDraft, giftPath, giftUrl, isGiftExpired, validateDraft, type Gift, type GiftDraft } from './gift'
 import {
   checkoutAndCreateGift,
   loadGift,
@@ -83,7 +83,7 @@ export function useGiftById(_brand: BrandId) {
     loadGift(id).then(async (g) => {
       if (!alive) return
       setStored(g)
-      if (g?.hasVoice) {
+      if (g?.hasVoice && !isGiftExpired(g)) {
         const url = await loadVoiceUrl(g)
         if (alive) setVoiceSrc(url)
       }

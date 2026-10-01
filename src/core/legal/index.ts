@@ -1,4 +1,5 @@
 import { BRANDS, type BrandId } from '../brand'
+import { GIFT_TTL_HOURS } from '../gift'
 
 export type LegalPageId = 'terms' | 'privacy' | 'refund'
 
@@ -88,7 +89,7 @@ export function legalPages(brandId: BrandId): LegalPage[] {
         {
           heading: 'How long we keep it',
           paragraphs: [
-            'Gifts and voice files are kept while the gift is active. Deleted or reported gifts are removed or anonymized from public view. Payment records are kept as required by tax and accounting rules.',
+            `Gifts and voice files stay available for ${GIFT_TTL_HOURS / 24} days after purchase (the public link then expires). Deleted or reported gifts are removed or anonymized from public view sooner. Payment records are kept as required by tax and accounting rules.`,
           ],
         },
         {

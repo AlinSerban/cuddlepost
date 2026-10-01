@@ -1,4 +1,4 @@
-import { draftToGift, newGiftId, type GiftDraft } from '../gift'
+import { draftToGift, giftExpiresAt, newGiftId, type GiftDraft } from '../gift'
 import type { FinalizePaymentInput, GiftStore, StoredGift } from './types'
 import { newManageToken } from './types'
 
@@ -63,6 +63,7 @@ export function createLocalStore(): GiftStore {
         paymentProvider,
         manageToken: newManageToken(),
         status: 'paid',
+        expiresAt: base.expiresAt || giftExpiresAt(base.createdAt),
       }
       const all = readAll()
       all[id] = row

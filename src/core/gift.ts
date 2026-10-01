@@ -6,6 +6,9 @@ export type GiftStatus = 'pending_payment' | 'paid' | 'reported' | 'deleted'
 
 import type { BrandId } from './brand'
 
+/** Gift links stop working after this many hours. */
+export const GIFT_TTL_HOURS = 72
+
 export interface Gift {
   id: string
   brand: BrandId
@@ -19,10 +22,21 @@ export interface Gift {
   occasion: string
   hasVoice: boolean
   createdAt: number
+  /** When the public gift link stops working (ms since epoch). */
+  expiresAt: number
   status?: GiftStatus
 }
 
-export interface GiftDraft extends Omit<Gift, 'id' | 'createdAt' | 'hasVoice' | 'brand' | 'status'> {
+export function giftExpiresAt(createdAt: number) {
+  return createdAt + GIFT_TTL_HOURS * 60 * 60 * 1000
+}
+
+export function isGiftExpired(gift: Pick<Gift, 'createdAt' | 'expiresAt'>, now = Date.now()) {
+  const exp = gift.expiresAt || giftExpiresAt(gift.createdAt)
+  return now >= exp
+}
+
+export interface GiftDraft extends Omit<Gift, 'id' | 'createdAt' | 'expiresAt' | 'hasVoice' | 'brand' | 'status'> {
   senderEmail: string
   recipientEmail: string
   delivery: DeliveryMethod
@@ -90,6 +104,7 @@ export function newGiftId(): string {
 }
 
 export function draftToGift(draft: GiftDraft, id: string, brand: BrandId): Gift {
+  const createdAt = Date.now()
   return {
     id,
     brand,
@@ -102,7 +117,8 @@ export function draftToGift(draft: GiftDraft, id: string, brand: BrandId): Gift 
     message: draft.message.trim(),
     occasion: draft.occasion,
     hasVoice: Boolean(draft.voice),
-    createdAt: Date.now(),
+    createdAt,
+    expiresAt: giftExpiresAt(createdAt),
     status: 'paid',
   }
 }
