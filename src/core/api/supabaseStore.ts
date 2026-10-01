@@ -155,16 +155,24 @@ export function createSupabaseStore(): GiftStore {
     },
 
     async getGift(id) {
+      // Omit manage_token / emails from public reads (token only via receipt / ?manage=)
       const { data, error } = await sb
         .from('gifts')
-        .select('*')
+        .select(
+          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,voice_path,delivery,payment_id,payment_provider,status,created_at,deleted_at',
+        )
         .eq('id', id)
         .eq('status', 'paid')
         .is('deleted_at', null)
         .maybeSingle()
       if (error) throw error
       if (!data) return null
-      return rowToGift(data as GiftRow)
+      return rowToGift({
+        ...(data as Omit<GiftRow, 'manage_token' | 'sender_email' | 'recipient_email'>),
+        manage_token: '',
+        sender_email: '',
+        recipient_email: null,
+      })
     },
 
     async getVoiceUrl(gift) {

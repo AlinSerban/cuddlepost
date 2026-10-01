@@ -39,17 +39,60 @@ create table if not exists public.gift_reports (
   created_at timestamptz not null default now()
 );
 
--- Public can only read paid, non-deleted gifts (no emails / manage_token).
 alter table public.gifts enable row level security;
 alter table public.gift_reports enable row level security;
 
+-- Grants (needed because "Automatically expose new tables" was disabled)
+grant usage on schema public to anon, authenticated;
+grant select, insert, update on table public.gifts to anon, authenticated;
+grant select, insert on table public.gift_reports to anon, authenticated;
+
+drop policy if exists "Public read paid gifts" on public.gifts;
 create policy "Public read paid gifts"
   on public.gifts for select
+  to anon, authenticated
   using (status = 'paid' and deleted_at is null);
 
--- Inserts/updates go through Edge Functions with the service role key.
--- Voice files live in Storage bucket `gift-voices` (private; signed URLs from functions).
+-- TEMPORARY: allow client-side stub checkout until Edge Functions (finalize-gift) exist.
+-- Replace with service-role-only writes once Polar webhook + finalize-gift are live.
+drop policy if exists "Temp anon insert gifts" on public.gifts;
+create policy "Temp anon insert gifts"
+  on public.gifts for insert
+  to anon, authenticated
+  with check (brand = 'cuddlepost');
+
+drop policy if exists "Temp anon update gifts by manage token" on public.gifts;
+create policy "Temp anon update gifts by manage token"
+  on public.gifts for update
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+drop policy if exists "Temp anon insert reports" on public.gift_reports;
+create policy "Temp anon insert reports"
+  on public.gift_reports for insert
+  to anon, authenticated
+  with check (true);
 
 insert into storage.buckets (id, name, public)
 values ('gift-voices', 'gift-voices', false)
 on conflict (id) do nothing;
+
+-- Voice uploads from the browser (temporary until finalize-gift Edge Function)
+drop policy if exists "Temp anon upload voices" on storage.objects;
+create policy "Temp anon upload voices"
+  on storage.objects for insert
+  to anon, authenticated
+  with check (bucket_id = 'gift-voices');
+
+drop policy if exists "Temp anon update voices" on storage.objects;
+create policy "Temp anon update voices"
+  on storage.objects for update
+  to anon, authenticated
+  using (bucket_id = 'gift-voices');
+
+drop policy if exists "Temp anon read voices" on storage.objects;
+create policy "Temp anon read voices"
+  on storage.objects for select
+  to anon, authenticated
+  using (bucket_id = 'gift-voices');

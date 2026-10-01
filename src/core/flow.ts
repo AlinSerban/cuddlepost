@@ -7,6 +7,7 @@ import {
   loadGift,
   loadVoiceUrl,
   recallManageToken,
+  rememberManageToken,
   toPublicGift,
 } from './services'
 import type { StoredGift } from './api'
@@ -40,8 +41,11 @@ export function useGiftFlow(brand: BrandId, initial?: Partial<GiftDraft>) {
         if (!payment.checkoutUrl) setError('Payment failed, please try again.')
         return
       }
-      const via = draft.delivery === 'email' ? `?to=${encodeURIComponent(draft.recipientEmail)}` : ''
-      navigate(`/sent/${gift.id}${via}`)
+      const q = new URLSearchParams()
+      if (draft.delivery === 'email' && draft.recipientEmail) q.set('to', draft.recipientEmail)
+      // Keep manage/delete link on this page even if localStorage is cleared
+      q.set('manage', gift.manageToken)
+      navigate(`/sent/${gift.id}?${q.toString()}`)
     } catch (err) {
       console.error(err)
       setPaying(false)
@@ -92,6 +96,11 @@ export function useGiftById(_brand: BrandId) {
   const gift: Gift | null | undefined =
     stored === undefined ? undefined : stored ? toPublicGift(stored) : null
 
+  const manageFromUrl = params.get('manage')
+  useEffect(() => {
+    if (id && manageFromUrl) rememberManageToken(id, manageFromUrl)
+  }, [id, manageFromUrl])
+
   return {
     id,
     loading: stored === undefined,
@@ -101,7 +110,7 @@ export function useGiftById(_brand: BrandId) {
     path: gift ? giftPath(gift.id) : '',
     voiceSrc,
     emailedTo: params.get('to'),
-    manageToken: id ? recallManageToken(id) : null,
+    manageToken: manageFromUrl || (id ? recallManageToken(id) : null),
   }
 }
 
