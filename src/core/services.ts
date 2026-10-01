@@ -68,22 +68,27 @@ export async function checkoutAndCreateGift(
   const url = giftUrl(gift.id)
   const manage = manageUrl(gift.id, gift.manageToken)
 
-  await sendGiftEmail({
-    kind: 'receipt',
-    brand,
-    to: draft.senderEmail,
-    gift,
-    giftUrl: url,
-    manageUrl: manage,
-  })
-  if (draft.delivery === 'email' && draft.recipientEmail) {
+  try {
     await sendGiftEmail({
-      kind: 'gift',
+      kind: 'receipt',
       brand,
-      to: draft.recipientEmail,
+      to: draft.senderEmail,
       gift,
       giftUrl: url,
+      manageUrl: manage,
     })
+    if (draft.delivery === 'email' && draft.recipientEmail) {
+      await sendGiftEmail({
+        kind: 'gift',
+        brand,
+        to: draft.recipientEmail,
+        gift,
+        giftUrl: url,
+      })
+    }
+  } catch (err) {
+    // Gift is already saved — don't fail checkout if mail provider blips
+    console.error('[email] send failed after gift created', err)
   }
 
   return { payment, gift }

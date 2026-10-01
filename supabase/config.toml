@@ -1,0 +1,6 @@
+# A string used to distinguish different Supabase projects on the same host. Mainly used
+# for local development.
+project_id = "cuddlepost"
+
+[functions.send-email]
+verify_jwt = true

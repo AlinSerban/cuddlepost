@@ -209,7 +209,7 @@ export function Landing() {
           {BRAND} · made with care · {PRICE.label} per plushie
         </span>
         <span>
-          post@cuddlepost.com · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link> ·{' '}
+          post@cuddlepost.fun · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link> ·{' '}
           <Link to="/refund">Refunds</Link>
         </span>
       </footer>

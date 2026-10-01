@@ -11,7 +11,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
   cuddlepost: {
     id: 'cuddlepost',
     name: 'Cuddlepost',
-    supportEmail: 'post@cuddlepost.com',
+    supportEmail: 'post@cuddlepost.fun',
     tagline: 'A little hug, posted in seconds',
   },
 }
