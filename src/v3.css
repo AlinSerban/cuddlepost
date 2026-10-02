@@ -278,6 +278,17 @@
   margin-bottom: 44px;
 }
 
+.v3-section > h2:has(+ .v3-section-lede) {
+  margin-bottom: 10px;
+}
+
+.v3-section-lede {
+  text-align: center;
+  color: var(--pg-muted);
+  margin: 0 0 36px;
+  font-size: 0.98rem;
+}
+
 .v3-steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

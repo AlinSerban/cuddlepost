@@ -119,15 +119,31 @@ export function Landing() {
       </section>
 
       <section className="v3-section">
-        <h2>When to send one</h2>
+        <h2>Little reasons to post a hug</h2>
+        <p className="v3-section-lede">Example tags. Tap one to start stitching.</p>
         <div className="v3-postcards">
           {[
-            ['Far away', 'Same hug, different time zone.', 'I miss you', '✈️'],
-            ['Big day', 'Birthday, get-well, thank-you. Soft surprise, no shipping.', 'Happy birthday', '🎂'],
-            ['Just because', 'A little cuddle for no reason at all.', 'Just because', '♡'],
-          ].map(([title, blurb, occasion, stamp], i) => (
+            [
+              'Miss you already. Squeeze this when the house feels quiet.',
+              'for Dad, from Maya',
+              'I miss you',
+              '🧸',
+            ],
+            [
+              'Happy birthday, you absolute legend. This one’s for your desk.',
+              'for Priya',
+              'Happy birthday',
+              '🎂',
+            ],
+            [
+              'No reason. Just wanted you to have something soft today.',
+              'just because',
+              'Just because',
+              '♡',
+            ],
+          ].map(([note, from, occasion, stamp], i) => (
             <button
-              key={title}
+              key={occasion}
               type="button"
               className="v3-postcard v3-postcard-btn"
               style={{ rotate: `${[-1.5, 1, -0.5][i]}deg` }}
@@ -136,8 +152,8 @@ export function Landing() {
                 document.getElementById('bench')?.scrollIntoView({ behavior: 'smooth' })
               }}
             >
-              <p className="v3-postcard-quote">{blurb}</p>
-              <span className="v3-postcard-label">{title}</span>
+              <p className="v3-postcard-quote">{note}</p>
+              <span className="v3-postcard-label">{from}</span>
               <span className="v3-postcard-stamp" aria-hidden>
                 {stamp}
               </span>
