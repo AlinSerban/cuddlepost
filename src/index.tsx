@@ -105,7 +105,7 @@ export function Landing() {
         <h2>From our little workshop</h2>
         <div className="v3-steps">
           {[
-            ['Choose a friend', 'A bear, bunny, kitty or puppy — each one soft and a little squishy.'],
+            ['Choose a friend', 'A bear, bunny, kitty or puppy, each one soft and a little squishy.'],
             ['Sew it your way', 'Any fabric color you can dream up, plus patches on the chest, head or feet.'],
             ['Tie on a tag', 'Write a note in your words. Add your voice, if you like.'],
           ].map(([t, d], i) => (
@@ -119,18 +119,29 @@ export function Landing() {
       </section>
 
       <section className="v3-section">
-        <h2>Letters from our senders</h2>
+        <h2>When to send one</h2>
         <div className="v3-postcards">
           {[
-            ['My mum lives across the ocean. She keeps her Cuddlepost open on her tablet by the bed.', 'Anna, Toronto'],
-            ['Sent my nephew a blue puppy with paw prints on his feet. He named it Biscuit.', 'Sam, Leeds'],
-            ["After my friend's surgery I couldn't visit. This was the next best thing.", 'Rosa, Austin'],
-          ].map(([q, a], i) => (
-            <figure key={a} className="v3-postcard" style={{ rotate: `${[-1.5, 1, -0.5][i]}deg` }}>
-              <blockquote>{q}</blockquote>
-              <figcaption>— {a}</figcaption>
-              <span className="v3-postcard-stamp">♡</span>
-            </figure>
+            ['Far away', 'Same hug, different time zone.', 'I miss you', '✈️'],
+            ['Big day', 'Birthday, get-well, thank-you. Soft surprise, no shipping.', 'Happy birthday', '🎂'],
+            ['Just because', 'A little cuddle for no reason at all.', 'Just because', '♡'],
+          ].map(([title, blurb, occasion, stamp], i) => (
+            <button
+              key={title}
+              type="button"
+              className="v3-postcard v3-postcard-btn"
+              style={{ rotate: `${[-1.5, 1, -0.5][i]}deg` }}
+              onClick={() => {
+                update({ occasion })
+                document.getElementById('bench')?.scrollIntoView({ behavior: 'smooth' })
+              }}
+            >
+              <p className="v3-postcard-quote">{blurb}</p>
+              <span className="v3-postcard-label">{title}</span>
+              <span className="v3-postcard-stamp" aria-hidden>
+                {stamp}
+              </span>
+            </button>
           ))}
         </div>
       </section>
@@ -191,10 +202,10 @@ export function Landing() {
       <section className="v3-section v3-faq">
         <h2>Good questions</h2>
         {[
-          ['Is it a physical toy?', "It's a digital 3D plushie — they can turn it, squeeze it and keep a screenshot forever. No shipping costs, nothing lost in the post."],
+          ['Is it a physical toy?', "It's a digital 3D plushie. They can turn it, squeeze it and keep a screenshot forever. No shipping costs, nothing lost in the post."],
           ['What do they need to open it?', 'Just a phone or computer with a browser. No app, no account.'],
           ['Can I add my voice?', 'Yes, up to a minute. Perfect for grandparents and little ones who love hearing you.'],
-          ['How long does the link last?', `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that the link expires — so share it while it's fresh.`],
+          ['How long does the link last?', `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that the link expires, so share it while it's fresh.`],
           ['What if they lose the link?', 'You get a copy by email (when email is on), plus a QR code you can print and pop in a card. Share it within a few days.'],
         ].map(([q, a]) => (
           <details key={q}>
@@ -263,7 +274,7 @@ export function Sent() {
             </button>
           </div>
           <p className="v3-hand v3-hand-sm" style={{ marginTop: '0.75rem' }}>
-            This link works for {GIFT_TTL_HOURS / 24} days — share it soon.
+            This link works for {GIFT_TTL_HOURS / 24} days. Share it soon.
           </p>
           <div className="v3-label-qr">
             <QrCode value={url} dark="#3b2f2a" light="#fffaf1" size={130} />

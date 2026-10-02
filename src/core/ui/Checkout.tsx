@@ -28,7 +28,7 @@ export function CheckoutModal({ draft, open, paying, onClose, onPay, title = 'Ch
         <div className="pg-summary">
           <div className="pg-summary-row">
             <span>
-              {plush.emoji} {plush.label} for {draft.recipientName || '—'}
+              {plush.emoji} {plush.label} for {draft.recipientName || '…'}
             </span>
             <strong>{PRICE.label}</strong>
           </div>

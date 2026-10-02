@@ -38,7 +38,7 @@ export function ManageGiftPage({ themeClass, homePath = '/', btnClass = 'pg-pay-
               Gift id: <code>{id}</code>
             </p>
             <p>Deleting removes the page and any voice note. This cannot be undone.</p>
-            {status === 'bad' && <p className="pg-error">Could not delete — check your manage link.</p>}
+            {status === 'bad' && <p className="pg-error">Could not delete. Check your manage link.</p>}
             <button
               type="button"
               className={btnClass}

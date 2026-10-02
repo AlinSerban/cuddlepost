@@ -22,7 +22,7 @@ export function LegalDocument({ brand, page, themeClass, homePath = '/' }: Legal
           <Link to={homePath}>{b.name}</Link>
         </p>
         <h1>{doc.title}</h1>
-        <p className="pg-legal-note">Draft for review — not legal advice. Last updated 29 Sep 2026.</p>
+        <p className="pg-legal-note">Draft for review, not legal advice. Last updated 29 Sep 2026.</p>
         {doc.sections.map((s) => (
           <section key={s.heading}>
             <h2>{s.heading}</h2>

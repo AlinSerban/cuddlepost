@@ -18,7 +18,7 @@ export function ReportGiftButton({ giftId, className }: { giftId: string; classN
   const [error, setError] = useState<string | null>(null)
 
   if (done) {
-    return <p className={className}>Thanks — we hid this gift from new visitors and will review it.</p>
+    return <p className={className}>Thanks. We hid this gift from new visitors and will review it.</p>
   }
 
   if (!open) {

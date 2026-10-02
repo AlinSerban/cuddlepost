@@ -325,16 +325,39 @@
   box-shadow: 0 10px 24px rgba(90, 59, 34, 0.15);
 }
 
-.v3-postcard blockquote {
+.v3-postcard blockquote,
+.v3-postcard-quote {
   margin: 0 0 14px;
   font-family: 'Caveat', cursive;
   font-size: 1.55rem;
   line-height: 32px;
 }
 
-.v3-postcard figcaption {
+.v3-postcard figcaption,
+.v3-postcard-label {
   font-weight: 700;
   color: var(--pg-muted);
+}
+
+.v3-postcard-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  border: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.v3-postcard-btn:hover {
+  transform: translateY(-3px) rotate(0deg);
+  box-shadow: 0 14px 28px rgba(90, 59, 34, 0.2);
+}
+
+.v3-postcard-btn:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 3px;
 }
 
 .v3-postcard-stamp {

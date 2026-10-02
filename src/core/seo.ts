@@ -60,7 +60,7 @@ export function usePageMeta(opts: {
 export function useBrandHomeMeta(brand: BrandId) {
   const b = BRANDS[brand]
   usePageMeta({
-    title: `${b.name} — ${b.tagline}`,
+    title: `${b.name} · ${b.tagline}`,
     description: `Send a personalized digital plushie with a private message. ${b.tagline}.`,
   })
 }
