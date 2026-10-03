@@ -221,6 +221,7 @@ export function Landing() {
           ['Is it a physical toy?', "It's a digital 3D plushie. They can turn it, squeeze it and keep a screenshot forever. No shipping costs, nothing lost in the post."],
           ['What do they need to open it?', 'Just a phone or computer with a browser. No app, no account.'],
           ['Can I add my voice?', 'Yes, up to a minute. Perfect for grandparents and little ones who love hearing you.'],
+          ['What if someone sends something mean?', 'Written names and messages are checked for abusive language before checkout. Voice isn’t auto-screened yet. Recipients can tap Report on the gift page and we’ll hide it.'],
           ['How long does the link last?', `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that the link expires, so share it while it's fresh.`],
           ['What if they lose the link?', 'You get a copy by email (when email is on), plus a QR code you can print and pop in a card. Share it within a few days.'],
         ].map(([q, a]) => (

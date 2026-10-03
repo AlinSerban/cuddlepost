@@ -5,6 +5,7 @@ export type DeliveryMethod = 'link' | 'email'
 export type GiftStatus = 'pending_payment' | 'paid' | 'reported' | 'deleted'
 
 import type { BrandId } from './brand'
+import { findBlockedText } from './moderation'
 
 /** Gift links stop working after this many hours. */
 export const GIFT_TTL_HOURS = 72
@@ -138,5 +139,11 @@ export function validateDraft(draft: GiftDraft): string | null {
   if (!/^\S+@\S+\.\S+$/.test(draft.senderEmail)) return 'Add a valid email for your receipt'
   if (draft.delivery === 'email' && !/^\S+@\S+\.\S+$/.test(draft.recipientEmail))
     return "Add the recipient's email"
+  const blocked = findBlockedText([
+    { label: 'Your name', value: draft.senderName },
+    { label: "Their name", value: draft.recipientName },
+    { label: 'Your message', value: draft.message },
+  ])
+  if (blocked) return blocked
   return null
 }

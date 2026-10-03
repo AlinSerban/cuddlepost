@@ -38,8 +38,8 @@ export function legalPages(brandId: BrandId): LegalPage[] {
         {
           heading: 'Your content',
           paragraphs: [
-            'You are responsible for names, messages and voice notes you upload. Do not send illegal, abusive, harassing or copyrighted material you do not have rights to.',
-            'We may remove gifts that violate these terms or that are reported by recipients.',
+            'You are responsible for names, messages and voice notes you upload. Do not send hate speech, racial or other slurs, illegal, abusive, harassing or copyrighted material you do not have rights to. We may block messages that look like they break these rules.',
+            'We may remove gifts that violate these terms or that are reported by recipients. Voice notes are not automatically screened; report abuse from the gift page.',
           ],
         },
         {
