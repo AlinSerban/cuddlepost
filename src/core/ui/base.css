@@ -564,6 +564,65 @@ textarea {
   }
 }
 
+/* ---- Report gift form ---- */
+.pg-report {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 420px);
+  padding: 20px 22px;
+  margin: 8px 0;
+  background: var(--pg-surface);
+  border: 1.5px solid var(--pg-border);
+  border-radius: calc(var(--pg-radius) * 1.1);
+  box-shadow: var(--pg-shadow);
+  text-align: left;
+}
+
+.pg-report-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.pg-report-lede {
+  margin: -6px 0 0;
+  color: var(--pg-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.pg-report .pg-field select {
+  width: 100%;
+  border: 1.5px solid var(--pg-border);
+  background: var(--pg-field-bg);
+  color: var(--pg-text);
+  border-radius: calc(var(--pg-radius) * 0.75);
+  padding: 12px 14px;
+  outline: none;
+}
+
+.pg-report .pg-field select:focus {
+  border-color: var(--pg-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pg-accent) 20%, transparent);
+}
+
+.pg-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pg-report-done {
+  margin: 8px 0;
+  padding: 14px 16px;
+  border-radius: var(--pg-radius);
+  background: color-mix(in srgb, var(--pg-accent) 10%, var(--pg-surface));
+  color: var(--pg-text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 420px;
+}
+
 /* ---- Legal pages (Terms / Privacy / Refunds) ---- */
 .pg-legal-top {
   display: flex;

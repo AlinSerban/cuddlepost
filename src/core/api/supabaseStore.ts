@@ -190,12 +190,53 @@ export function createSupabaseStore(): GiftStore {
     },
 
     async reportGift(id, reason, details) {
-      try {
-        await callFunction('report-gift', { giftId: id, reason, details })
-        return
-      } catch {
+      const { data: rpcOk, error: rpcErr } = await sb.rpc('report_gift', {
+        p_id: id,
+        p_reason: reason,
+        p_details: details || null,
+      })
+      if (rpcErr) {
+        console.warn('[supabase] report_gift rpc unavailable, trying direct insert', rpcErr.message)
         const { error } = await sb.from('gift_reports').insert({ gift_id: id, reason, details: details || null })
         if (error) throw error
+        const { error: upErr } = await sb.from('gifts').update({ status: 'reported' }).eq('id', id).eq('status', 'paid')
+        if (upErr) console.warn('[supabase] could not mark gift reported', upErr.message)
+      } else if (!rpcOk) {
+        throw new Error('Gift not found or already removed')
+      }
+
+      // Notify support inbox (best-effort; report already saved)
+      try {
+        const fnBase =
+          (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
+        if (import.meta.env.VITE_EMAIL_ENABLED === 'true' && fnBase) {
+          await fetch(`${fnBase}/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              to: 'post@cuddlepost.fun',
+              subject: `Gift reported · ${id}`,
+              body: [
+                `A gift was reported on Cuddlepost.`,
+                ``,
+                `Gift id: ${id}`,
+                `Reason: ${reason}`,
+                details ? `Details: ${details}` : '',
+                `Open (if still visible): ${typeof window !== 'undefined' ? window.location.origin : ''}/gift/${id}`,
+              ]
+                .filter(Boolean)
+                .join('\n'),
+              from: 'post@cuddlepost.fun',
+              kind: 'report',
+            }),
+          })
+        }
+      } catch (err) {
+        console.warn('[supabase] report email notify failed', err)
       }
     },
 

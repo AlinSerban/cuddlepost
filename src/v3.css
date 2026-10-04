@@ -556,6 +556,21 @@
   border-style: dashed;
 }
 
+.v3 .pg-report {
+  border-style: dashed;
+  justify-self: center;
+}
+
+.v3 .pg-report-title {
+  font-family: 'Fraunces', serif;
+}
+
+.v3 .pg-report-done {
+  justify-self: center;
+  text-align: center;
+  border: 1.5px dashed var(--kraft);
+}
+
 .v3-footer {
   display: flex;
   flex-wrap: wrap;
