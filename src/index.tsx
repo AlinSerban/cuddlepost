@@ -236,20 +236,8 @@ export function Landing() {
             'No. They open the link in any normal phone or computer browser. No account, no download.',
           ],
           [
-            'Can I add a voice note?',
-            'Yes, optional, up to about a minute. Nice for grandparents and little ones who love hearing you.',
-          ],
-          [
             'How long does the link last?',
             `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that it expires, so share it while it's fresh.`,
-          ],
-          [
-            'What if they lose the link?',
-            'You get a copy by email (when email is on), plus a QR code you can print. Share it within a few days.',
-          ],
-          [
-            'How much does it cost?',
-            `One plushie is ${PRICE.label}. One-time payment, no subscription.`,
           ],
         ].map(([q, a]) => (
           <details key={q}>
