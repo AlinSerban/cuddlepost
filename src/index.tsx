@@ -312,23 +312,23 @@ export function Sent() {
             <p className="v3-hand v3-hand-sm">print me & tuck me into a card</p>
           </div>
           <div className="v3-actions">
-            <Link to={path} className="v3-btn">
-              Peek inside the parcel
-            </Link>
-            <Link to="/" className="v3-btn v3-btn-ghost">
-              Stitch another
-            </Link>
-          </div>
-          {manageToken && (
-            <p className="v3-delete-wrap">
+            <div className="v3-actions-row">
+              <Link to={path} className="v3-btn">
+                Peek inside the parcel
+              </Link>
+              <Link to="/" className="v3-btn v3-btn-ghost">
+                Stitch another
+              </Link>
+            </div>
+            {manageToken && (
               <Link
                 to={`/manage/${gift.id}?token=${encodeURIComponent(manageToken)}`}
                 className="v3-btn v3-btn-sm v3-btn-ghost v3-btn-delete"
               >
                 Delete this gift
               </Link>
-            </p>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
