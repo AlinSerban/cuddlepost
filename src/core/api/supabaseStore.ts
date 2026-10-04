@@ -200,22 +200,23 @@ export function createSupabaseStore(): GiftStore {
     },
 
     async deleteGift(id, manageToken) {
-      try {
-        const res = await callFunction<{ ok: boolean }>('delete-gift', { giftId: id, manageToken })
-        return res.ok
-      } catch {
-        // No .select() after update: RETURNING a deleted row fails the public
-        // "status = paid" SELECT policy (Postgres error 42501).
-        const { error } = await sb
-          .from('gifts')
-          .update({ status: 'deleted', deleted_at: new Date().toISOString() })
-          .eq('id', id)
-          .eq('manage_token', manageToken)
-        if (error) throw error
-        // Confirm: public get no longer returns the gift (wrong token → still visible → false).
-        const still = await this.getGift(id)
-        return still === null
-      }
+      // Prefer SECURITY DEFINER RPC (see migration 003) — avoids anon UPDATE RLS issues.
+      const { data: rpcOk, error: rpcErr } = await sb.rpc('delete_gift', {
+        p_id: id,
+        p_token: manageToken,
+      })
+      if (!rpcErr) return Boolean(rpcOk)
+
+      // Fallback: direct update (needs UPDATE policy WITH CHECK allowing status=deleted)
+      console.warn('[supabase] delete_gift rpc unavailable, trying direct update', rpcErr.message)
+      const { error } = await sb
+        .from('gifts')
+        .update({ status: 'deleted', deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('manage_token', manageToken)
+      if (error) throw error
+      const still = await this.getGift(id)
+      return still === null
     },
   }
 }
