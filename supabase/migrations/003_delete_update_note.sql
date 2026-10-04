@@ -1,0 +1,12 @@
+-- No schema change required for delete.
+-- Soft-delete is: UPDATE gifts SET status = 'deleted', deleted_at = now()
+-- WHERE id = $1 AND manage_token = $2
+--
+-- Client must NOT use .select() / RETURNING after that update: the public
+-- SELECT policy only allows status = 'paid' AND deleted_at IS null, so
+-- returning the deleted row fails with 42501 (row-level security).
+-- Fixed in src/core/api/supabaseStore.ts (deleteGift).
+--
+-- When Creem finalize-gift lands, prefer a delete-gift Edge Function with
+-- the service role and then drop the temp anon UPDATE policy.
+select 1;

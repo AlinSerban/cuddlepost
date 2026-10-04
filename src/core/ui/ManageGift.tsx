@@ -45,8 +45,13 @@ export function ManageGiftPage({ themeClass, homePath = '/', btnClass = 'pg-pay-
               disabled={!token || status === 'busy'}
               onClick={async () => {
                 setStatus('busy')
-                const ok = await deleteGift(id, token)
-                setStatus(ok ? 'gone' : 'bad')
+                try {
+                  const ok = await deleteGift(id, token)
+                  setStatus(ok ? 'gone' : 'bad')
+                } catch (err) {
+                  console.error('[manage] delete failed', err)
+                  setStatus('bad')
+                }
               }}
             >
               {status === 'busy' ? 'Deleting…' : 'Delete gift permanently'}

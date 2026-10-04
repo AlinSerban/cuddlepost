@@ -204,14 +204,17 @@ export function createSupabaseStore(): GiftStore {
         const res = await callFunction<{ ok: boolean }>('delete-gift', { giftId: id, manageToken })
         return res.ok
       } catch {
-        const { data, error } = await sb
+        // No .select() after update: RETURNING a deleted row fails the public
+        // "status = paid" SELECT policy (Postgres error 42501).
+        const { error } = await sb
           .from('gifts')
           .update({ status: 'deleted', deleted_at: new Date().toISOString() })
           .eq('id', id)
           .eq('manage_token', manageToken)
-          .select('id')
         if (error) throw error
-        return Boolean(data?.length)
+        // Confirm: public get no longer returns the gift (wrong token → still visible → false).
+        const still = await this.getGift(id)
+        return still === null
       }
     },
   }
