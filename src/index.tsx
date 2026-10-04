@@ -6,6 +6,7 @@ import { isStandalone, Keepsake, useHomeScreenSetup } from './core/keepsake'
 import { PlushViewer } from './core/plushie/PlushViewer'
 import { useBrandHomeMeta, useGiftMeta } from './core/seo'
 import { CheckoutModal } from './core/ui/Checkout'
+import { ErrorBoundary } from './core/ui/ErrorBoundary'
 import { ColorWheel } from './core/ui/ColorWheel'
 import { DeliveryFields, MessageFields } from './core/ui/Fields'
 import { PatchEditor, PlushPicker } from './core/ui/Pickers'
@@ -330,6 +331,14 @@ export function Sent() {
 }
 
 export function Gift() {
+  return (
+    <ErrorBoundary className="pg-theme v3">
+      <GiftInner />
+    </ErrorBoundary>
+  )
+}
+
+function GiftInner() {
   const { gift, voiceSrc, loading } = useGiftById('cuddlepost')
   const [stage, setStage] = useState<'closed' | 'opening' | 'open'>(() => (isStandalone() ? 'open' : 'closed'))
   useGiftMeta('cuddlepost', gift)
@@ -360,7 +369,9 @@ export function Gift() {
           <p>{stage === 'opening' ? 'Untying the ribbon…' : 'Tap the box to untie the ribbon'}</p>
         </main>
       ) : (
-        <GiftOpen gift={gift} voiceSrc={voiceSrc} />
+        <ErrorBoundary className="pg-theme v3">
+          <GiftOpen gift={gift} voiceSrc={voiceSrc} />
+        </ErrorBoundary>
       )}
     </div>
   )

@@ -12,7 +12,7 @@ export interface DeviceInfo {
 }
 
 const IN_APP_BROWSER =
-  /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|Bytedance|Snapchat|Twitter|LinkedInApp|Pinterest|; wv\)/i
+  /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|Bytedance|Snapchat|Twitter|LinkedInApp|Pinterest|Yahoo|YMail|AOLApp|; wv\)/i
 
 export function isStandalone(): boolean {
   return (

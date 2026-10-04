@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { PLUSH_TYPES, type Gift, type VersionId } from '../gift'
+import { PLUSH_TYPES, type Gift } from '../gift'
 import { getDevice } from './device'
 import { snapshotPlush } from './snapshot'
 import type { KeepsakeTheme } from './theme'
@@ -82,9 +82,9 @@ function upsert(tag: 'meta' | 'link', key: string, value: string): () => void {
  * Makes the current gift page installable on phones: a per-gift manifest whose start URL is this
  * exact gift, and an app icon drawn from their plushie. Desktop is skipped on purpose.
  */
-export function useHomeScreenSetup(gift: Gift | null, version: VersionId, theme: KeepsakeTheme) {
+export function useHomeScreenSetup(gift: Gift | null, theme: KeepsakeTheme) {
   useEffect(() => {
-    if (!gift || getDevice().platform === 'desktop') return
+    if (!gift || !theme || getDevice().platform === 'desktop') return
     const label = homeScreenLabel(gift)
     const undo = [
       upsert('meta', 'theme-color', theme.appColor),
@@ -102,11 +102,11 @@ export function useHomeScreenSetup(gift: Gift | null, version: VersionId, theme:
         const origin = window.location.origin
         // A blob manifest resolves relative URLs against blob:, so everything here is absolute.
         const manifest = {
-          id: `${origin}/${version}/gift/${gift.id}`,
+          id: `${origin}/gift/${gift.id}`,
           name: `${label} · ${theme.brand}`,
           short_name: label,
           start_url: window.location.href,
-          scope: `${origin}/${version}/`,
+          scope: `${origin}/`,
           display: 'standalone',
           orientation: 'portrait',
           background_color: theme.appColor,
@@ -127,7 +127,7 @@ export function useHomeScreenSetup(gift: Gift | null, version: VersionId, theme:
       undo.forEach((fn) => fn())
       if (manifestUrl) URL.revokeObjectURL(manifestUrl)
     }
-  }, [gift, version, theme])
+  }, [gift, theme])
 }
 
 interface BeforeInstallPromptEvent extends Event {

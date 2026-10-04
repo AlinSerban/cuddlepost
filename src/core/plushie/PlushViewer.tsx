@@ -62,7 +62,8 @@ export function PlushViewer({
   const [taps, setTaps] = useState(0)
   const [prevBounce, setPrevBounce] = useState(bounceOn)
   const [bounces, setBounces] = useState(0)
-  const [ok, setOk] = useState(true)
+  // Check sync so the first paint never mounts Canvas in broken WebViews.
+  const [ok, setOk] = useState(webglOk)
 
   if (prevBounce !== bounceOn) {
     setPrevBounce(bounceOn)
@@ -70,8 +71,11 @@ export function PlushViewer({
   }
 
   useEffect(() => {
-    setOk(webglOk())
-  }, [])
+    if (!ok) return
+    const onLost = () => setOk(false)
+    window.addEventListener('webglcontextlost', onLost as EventListener, true)
+    return () => window.removeEventListener('webglcontextlost', onLost as EventListener, true)
+  }, [ok])
 
   if (!ok) {
     return <StaticFallback className={className} plush={plush.plush} color={plush.color} />
@@ -81,7 +85,7 @@ export function PlushViewer({
     <div className={className} style={{ touchAction: 'none' }}>
       <Canvas
         shadows
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 0.95, 5.5], fov: 34 }}
         onCreated={({ gl }) => {
           gl.domElement.addEventListener('webglcontextlost', (e) => {
@@ -89,6 +93,7 @@ export function PlushViewer({
             setOk(false)
           })
         }}
+        onError={() => setOk(false)}
         fallback={<StaticFallback className={className} plush={plush.plush} color={plush.color} />}
       >
         <ambientLight intensity={0.55} />
