@@ -17,12 +17,32 @@ export function LegalDocument({ brand, page, themeClass, homePath = '/' }: Legal
 
   return (
     <div className={`pg-theme ${t}`}>
+      <header className="pg-legal-top">
+        <Link to={homePath} className="pg-legal-logo">
+          <span className="pg-legal-logo-mark" aria-hidden>
+            🧸
+          </span>
+          <span>
+            {b.name}
+            <small>back to home</small>
+          </span>
+        </Link>
+        <nav className="pg-legal-tabs" aria-label="Legal pages">
+          <Link to="/terms" className={page === 'terms' ? 'is-active' : undefined}>
+            Terms
+          </Link>
+          <Link to="/privacy" className={page === 'privacy' ? 'is-active' : undefined}>
+            Privacy
+          </Link>
+          <Link to="/refund" className={page === 'refund' ? 'is-active' : undefined}>
+            Refunds
+          </Link>
+        </nav>
+      </header>
+
       <main className="pg-legal">
-        <p className="pg-legal-brand">
-          <Link to={homePath}>{b.name}</Link>
-        </p>
         <h1>{doc.title}</h1>
-        <p className="pg-legal-note">Draft for review, not legal advice. Last updated 29 Sep 2026.</p>
+        <p className="pg-legal-note">Last updated 29 Sep 2026</p>
         {doc.sections.map((s) => (
           <section key={s.heading}>
             <h2>{s.heading}</h2>
@@ -31,12 +51,9 @@ export function LegalDocument({ brand, page, themeClass, homePath = '/' }: Legal
             ))}
           </section>
         ))}
-        <nav className="pg-legal-nav">
-          <Link to="/terms">Terms</Link>
-          <Link to="/privacy">Privacy</Link>
-          <Link to="/refund">Refunds</Link>
-          <Link to={homePath}>Home</Link>
-        </nav>
+        <p className="pg-legal-contact">
+          Questions? Email <a href={`mailto:${b.supportEmail}`}>{b.supportEmail}</a>
+        </p>
       </main>
     </div>
   )

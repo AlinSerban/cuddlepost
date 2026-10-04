@@ -216,14 +216,41 @@ export function Landing() {
       </section>
 
       <section className="v3-section v3-faq">
-        <h2>Good questions</h2>
+        <h2>FAQ</h2>
+        <p className="v3-section-lede">Frequently asked questions</p>
         {[
-          ['Is it a physical toy?', "It's a digital 3D plushie. They can turn it, squeeze it and keep a screenshot forever. No shipping costs, nothing lost in the post."],
-          ['What do they need to open it?', 'Just a phone or computer with a browser. No app, no account.'],
-          ['Can I add my voice?', 'Yes, up to a minute. Perfect for grandparents and little ones who love hearing you.'],
-          ['What if someone sends something mean?', 'Written names and messages are checked for abusive language before checkout. Voice isn’t auto-screened yet. Recipients can tap Report on the gift page and we’ll hide it.'],
-          ['How long does the link last?', `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that the link expires, so share it while it's fresh.`],
-          ['What if they lose the link?', 'You get a copy by email (when email is on), plus a QR code you can print and pop in a card. Share it within a few days.'],
+          [
+            'Why a digital plushie instead of a real toy?',
+            'Physical gifts can be late, expensive to ship, or lost in the post. A Cuddlepost arrives in seconds: a 3D plushie they can turn and squeeze, with your note (and optional voice) on a private page.',
+          ],
+          [
+            'How long does delivery take?',
+            'Usually under a minute after payment. We create the gift page right away and show you the link (and email it when email delivery is on).',
+          ],
+          [
+            'How is the gift sent?',
+            'You choose email or a private link with QR code. For email we send it for you; for link & QR you share it yourself (chat, print the QR in a card, etc.).',
+          ],
+          [
+            'Does the recipient need an app?',
+            'No. They open the link in any normal phone or computer browser. No account, no download.',
+          ],
+          [
+            'Can I add a voice note?',
+            'Yes, optional, up to about a minute. Nice for grandparents and little ones who love hearing you.',
+          ],
+          [
+            'How long does the link last?',
+            `The gift page stays open for ${GIFT_TTL_HOURS / 24} days. After that it expires, so share it while it's fresh.`,
+          ],
+          [
+            'What if they lose the link?',
+            'You get a copy by email (when email is on), plus a QR code you can print. Share it within a few days.',
+          ],
+          [
+            'How much does it cost?',
+            `One plushie is ${PRICE.label}. One-time payment, no subscription.`,
+          ],
         ].map(([q, a]) => (
           <details key={q}>
             <summary>{q}</summary>
@@ -233,9 +260,7 @@ export function Landing() {
       </section>
 
       <footer className="v3-footer">
-        <span>
-          {BRAND} · made with care · {PRICE.label} per plushie
-        </span>
+        <span>{BRAND} · made with care</span>
         <span>
           post@cuddlepost.fun · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link> ·{' '}
           <Link to="/refund">Refunds</Link>

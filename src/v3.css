@@ -503,11 +503,39 @@
   font-family: 'Fraunces', serif;
   font-size: 1.25rem;
   font-weight: 500;
+  list-style: none;
+}
+
+.v3-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.v3-faq summary::after {
+  content: '+';
+  float: right;
+  color: var(--terracotta);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.v3-faq details[open] summary::after {
+  content: '–';
 }
 
 .v3-faq p {
   color: var(--pg-muted);
   line-height: 1.6;
+  margin: 10px 0 0;
+  padding-right: 28px;
+}
+
+/* legal pages on cuddlepost theme */
+.v3 .pg-legal-logo {
+  font-family: 'Fraunces', serif;
+}
+
+.v3 .pg-legal section {
+  border-style: dashed;
 }
 
 .v3-footer {

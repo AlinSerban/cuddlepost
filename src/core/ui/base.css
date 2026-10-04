@@ -564,3 +564,123 @@ textarea {
   }
 }
 
+/* ---- Legal pages (Terms / Privacy / Refunds) ---- */
+.pg-legal-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 22px clamp(16px, 4vw, 28px) 0;
+}
+
+.pg-legal-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+}
+
+.pg-legal-logo small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--pg-muted);
+}
+
+.pg-legal-logo-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pg-surface);
+  border: 1.5px solid var(--pg-border);
+  font-size: 1.25rem;
+}
+
+.pg-legal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pg-legal-tabs a {
+  text-decoration: none;
+  color: var(--pg-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+}
+
+.pg-legal-tabs a:hover {
+  color: var(--pg-text);
+  background: color-mix(in srgb, var(--pg-surface) 80%, transparent);
+}
+
+.pg-legal-tabs a.is-active {
+  color: var(--pg-accent-text);
+  background: var(--pg-accent);
+  border-color: var(--pg-accent);
+}
+
+.pg-legal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px clamp(16px, 4vw, 28px) 72px;
+}
+
+.pg-legal h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  margin: 0 0 8px;
+  line-height: 1.15;
+}
+
+.pg-legal-note {
+  margin: 0 0 28px;
+  color: var(--pg-muted);
+  font-size: 0.9rem;
+}
+
+.pg-legal section {
+  margin: 0 0 28px;
+  padding: 22px 24px;
+  background: var(--pg-surface);
+  border: 1.5px solid var(--pg-border);
+  border-radius: calc(var(--pg-radius) * 1.1);
+  box-shadow: var(--pg-shadow);
+}
+
+.pg-legal section h2 {
+  font-size: 1.15rem;
+  margin: 0 0 12px;
+}
+
+.pg-legal section p {
+  margin: 0 0 10px;
+  color: color-mix(in srgb, var(--pg-text) 88%, var(--pg-muted));
+  line-height: 1.65;
+  font-size: 0.98rem;
+}
+
+.pg-legal section p:last-child {
+  margin-bottom: 0;
+}
+
+.pg-legal-contact {
+  margin: 8px 0 0;
+  color: var(--pg-muted);
+  font-size: 0.95rem;
+}
+
+.pg-legal-contact a {
+  color: var(--pg-accent);
+  font-weight: 600;
+}
+
