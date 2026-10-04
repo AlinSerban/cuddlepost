@@ -121,6 +121,7 @@
   font-weight: 600;
   color: var(--sage);
   border-color: var(--sage);
+  outline-color: var(--sage);
   background: color-mix(in srgb, var(--sage) 12%, #fffaf1);
   align-self: flex-start;
 }
@@ -128,6 +129,7 @@
 .v3-btn-delete:hover {
   color: #fff;
   border-color: var(--sage);
+  outline-color: rgba(255, 255, 255, 0.65);
   background: var(--sage);
 }
 
