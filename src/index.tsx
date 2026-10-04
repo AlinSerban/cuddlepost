@@ -320,8 +320,13 @@ export function Sent() {
             </Link>
           </div>
           {manageToken && (
-            <p style={{ marginTop: '1rem' }}>
-              <Link to={`/manage/${gift.id}?token=${encodeURIComponent(manageToken)}`}>Delete this gift</Link>
+            <p className="v3-delete-wrap">
+              <Link
+                to={`/manage/${gift.id}?token=${encodeURIComponent(manageToken)}`}
+                className="v3-btn v3-btn-sm v3-btn-ghost v3-btn-delete"
+              >
+                Delete this gift
+              </Link>
             </p>
           )}
         </div>
