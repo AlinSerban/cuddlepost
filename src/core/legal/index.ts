@@ -14,7 +14,6 @@ export function legalPages(brandId: BrandId): LegalPage[] {
   const b = BRANDS[brandId]
   const name = b.name
   const email = b.supportEmail
-  const operator = 'an individual based in Romania (company / SRL to be confirmed)'
 
   return [
     {
@@ -25,7 +24,7 @@ export function legalPages(brandId: BrandId): LegalPage[] {
           heading: 'What this is',
           paragraphs: [
             `${name} sells a digital keepsake: a personalized 3D plushie page with your message (and optional voice note), delivered by private link and/or email.`,
-            `These pages are operated by ${operator}. Contact: ${email}.`,
+            `Contact: ${email}.`,
           ],
         },
         {
@@ -49,12 +48,6 @@ export function legalPages(brandId: BrandId): LegalPage[] {
           ],
         },
         {
-          heading: 'Payments',
-          paragraphs: [
-            'Checkout may be handled by a merchant of record (for example Polar, Paddle or Creem). Their terms also apply to the purchase. Prices are shown at checkout in the currency displayed.',
-          ],
-        },
-        {
           heading: 'Liability',
           paragraphs: [
             `${name} is provided as-is. To the extent allowed by law we are not liable for indirect damages, lost messages, or third-party messaging apps failing to show a link preview.`,
@@ -69,40 +62,38 @@ export function legalPages(brandId: BrandId): LegalPage[] {
         {
           heading: 'What we collect',
           paragraphs: [
-            `To deliver a ${name} we process: sender and recipient names, message text, optional voice audio, optional emails, gift design choices, payment identifiers from our payment provider, and basic technical logs (IP, browser) needed to run the site and prevent abuse.`,
+            `To deliver a ${name} we process: sender and recipient names, message text, optional voice audio, optional emails, gift design choices, payment details needed for your order, and basic technical logs needed to run the site and prevent abuse.`,
           ],
         },
         {
           heading: 'Why we process it',
           paragraphs: [
-            'Contract performance: create and show the gift, send receipts and delivery emails, handle refunds and abuse reports.',
-            'Legitimate interests: security, fraud prevention, and improving reliability.',
+            'To create and show the gift, send receipts and delivery emails, handle refunds and abuse reports, and keep the service secure.',
           ],
         },
         {
           heading: 'Who sees it',
           paragraphs: [
             'Anyone with the private gift link can open the gift page. Do not share the link publicly if the message is sensitive.',
-            'Processors may include: hosting (e.g. Cloudflare), database and file storage (e.g. Supabase), email (e.g. Resend), and payment / merchant of record providers. They only process data needed for their role.',
           ],
         },
         {
           heading: 'How long we keep it',
           paragraphs: [
-            `Gifts and voice files stay available for ${GIFT_TTL_HOURS / 24} days after purchase (the public link then expires). Deleted or reported gifts are removed or anonymized from public view sooner. Payment records are kept as required by tax and accounting rules.`,
+            `Gifts and voice files stay available for ${GIFT_TTL_HOURS / 24} days after purchase (the public link then expires). Deleted or reported gifts are removed sooner. Payment records are kept as required by law.`,
           ],
         },
         {
           heading: 'Your rights (EU / GDPR)',
           paragraphs: [
             `You can request access, correction, deletion or a copy of your personal data, and object to certain processing. Email ${email}. You may also lodge a complaint with your local supervisory authority.`,
-            'Senders can delete a gift using the manage link in their receipt email (when email is enabled) or the manage controls shown after purchase.',
+            'Senders can delete a gift using the manage link in their receipt email or the manage controls shown after purchase.',
           ],
         },
         {
           heading: 'Cookies',
           paragraphs: [
-            'We aim to run without non-essential cookies. Essential storage (for example local draft or payment return state) may be used in your browser.',
+            'We aim to run without non-essential cookies. Essential browser storage may be used to keep your draft or complete checkout.',
           ],
         },
       ],
@@ -121,7 +112,7 @@ export function legalPages(brandId: BrandId): LegalPage[] {
         {
           heading: 'How to ask',
           paragraphs: [
-            `Email ${email} within 14 days of purchase with your order/payment id and gift link. If checkout was through a merchant of record, we may process the refund through them.`,
+            `Email ${email} within 14 days of purchase with your order/payment id and gift link.`,
           ],
         },
         {
