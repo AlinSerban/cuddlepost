@@ -4,6 +4,12 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Keeps layout width stable when page height crosses the scrollbar threshold
+     (e.g. Terms/Refunds scroll, shorter Privacy does not). */
+  scrollbar-gutter: stable;
+}
+
 html,
 body,
 #root {
