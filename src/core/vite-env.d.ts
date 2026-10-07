@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_FUNCTIONS_URL?: string
   readonly VITE_PAYMENT_PROVIDER?: string
   readonly VITE_EMAIL_ENABLED?: string
+  readonly VITE_POSTHOG_PROJECT_TOKEN?: string
+  readonly VITE_POSTHOG_HOST?: string
 }
 
 interface ImportMeta {

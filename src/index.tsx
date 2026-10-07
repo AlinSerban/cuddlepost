@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { track } from './core/analytics'
 import { PLUSH_TYPES, PRICE, GIFT_TTL_HOURS, isGiftExpired, type Gift } from './core/gift'
 import { copyText, useGiftById, useGiftFlow } from './core/flow'
 import { isStandalone, Keepsake, useHomeScreenSetup } from './core/keepsake'
@@ -348,6 +349,10 @@ function GiftInner() {
   const [stage, setStage] = useState<'closed' | 'opening' | 'open'>(() => (isStandalone() ? 'open' : 'closed'))
   useGiftMeta('cuddlepost', gift)
   useHomeScreenSetup(gift ?? null, cuddlepostKeepsake)
+  useEffect(() => {
+    if (!gift || isGiftExpired(gift)) return
+    track('gift_opened', { plush: gift.plush, has_voice: gift.hasVoice })
+  }, [gift?.id])
   if (loading) return <Opening />
   if (!gift) return <Missing />
   if (isGiftExpired(gift)) return <Expired />

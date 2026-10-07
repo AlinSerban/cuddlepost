@@ -63,12 +63,13 @@ export function legalPages(brandId: BrandId): LegalPage[] {
           heading: 'What we collect',
           paragraphs: [
             `To deliver a ${name} we process: sender and recipient names, message text, optional voice audio, optional emails, gift design choices, payment details needed for your order, and basic technical logs needed to run the site and prevent abuse.`,
+            'We also use analytics to understand how the site is used (pages visited, button clicks, errors). Analytics does not include your gift message text.',
           ],
         },
         {
           heading: 'Why we process it',
           paragraphs: [
-            'To create and show the gift, send receipts and delivery emails, handle refunds and abuse reports, and keep the service secure.',
+            'To create and show the gift, send receipts and delivery emails, handle refunds and abuse reports, keep the service secure, and improve the product.',
           ],
         },
         {

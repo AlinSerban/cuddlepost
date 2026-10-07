@@ -9,10 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@posthog/react": "^1.11.3",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "@supabase/supabase-js": "^2.57.4",
     "obscenity": "^0.4.6",
+    "posthog-js": "^1.438.2",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

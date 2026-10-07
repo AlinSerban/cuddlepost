@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { track } from './analytics'
 import type { BrandId } from './brand'
 import { createDraft, giftPath, giftUrl, isGiftExpired, validateDraft, type Gift, type GiftDraft } from './gift'
 import {
@@ -27,13 +28,17 @@ export function useGiftFlow(brand: BrandId, initial?: Partial<GiftDraft>) {
   const openCheckout = () => {
     const problem = validateDraft(draft)
     setError(problem)
-    if (!problem) setCheckoutOpen(true)
+    if (!problem) {
+      setCheckoutOpen(true)
+      track('checkout_opened', { plush: draft.plush, delivery: draft.delivery })
+    }
     return !problem
   }
 
   const pay = async () => {
     setPaying(true)
     setError(null)
+    track('pay_clicked', { plush: draft.plush, delivery: draft.delivery })
     try {
       const { payment, gift } = await checkoutAndCreateGift(brand, draft)
       if (!payment.ok || !gift) {
@@ -41,6 +46,11 @@ export function useGiftFlow(brand: BrandId, initial?: Partial<GiftDraft>) {
         if (!payment.checkoutUrl) setError('Payment failed, please try again.')
         return
       }
+      track('gift_created', {
+        plush: draft.plush,
+        delivery: draft.delivery,
+        has_voice: Boolean(draft.voice),
+      })
       const q = new URLSearchParams()
       if (draft.delivery === 'email' && draft.recipientEmail) q.set('to', draft.recipientEmail)
       // Keep manage/delete link on this page even if localStorage is cleared
