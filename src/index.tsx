@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { track } from './core/analytics'
 import { PLUSH_TYPES, PRICE, GIFT_TTL_HOURS, isGiftExpired, type Gift } from './core/gift'
 import { copyText, useGiftById, useGiftFlow } from './core/flow'
@@ -15,11 +15,21 @@ import { QrCode } from './core/ui/QrCode'
 import { ReportGiftButton } from './core/ui/ReportGift'
 import { VoicePlayer } from './core/ui/Voice'
 import { cuddlepostKeepsake } from './keepsake'
-import './v3.css'
 
 const BRAND = 'Cuddlepost'
 
+function scrollToBench() {
+  document.getElementById('bench')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+function isBenchHash(hash: string) {
+  return hash === '#bench' || hash === 'bench'
+}
+
 function Nav() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   return (
     <nav className="v3-nav">
       <Link to="/" className="v3-logo">
@@ -29,7 +39,23 @@ function Nav() {
           <small>hugs by (very fast) post</small>
         </span>
       </Link>
-      <a href="#bench" className="v3-btn v3-btn-sm">
+      <a
+        href="/#bench"
+        className="v3-btn v3-btn-sm"
+        onClick={(e) => {
+          e.preventDefault()
+          if (location.pathname === '/') {
+            scrollToBench()
+            if (!isBenchHash(location.hash)) {
+              window.history.replaceState(null, '', '#bench')
+            }
+            return
+          }
+          // Landing mounts async; flag survives the route change so we scroll once it's ready.
+          sessionStorage.setItem('pg-scroll-bench', '1')
+          navigate({ pathname: '/', hash: '#bench' })
+        }}
+      >
         Start stitching
       </a>
     </nav>
@@ -54,6 +80,7 @@ function postDate(ts: number) {
 
 export function Landing() {
   useBrandHomeMeta('cuddlepost')
+  const location = useLocation()
   const flow = useGiftFlow('cuddlepost', {
     plush: 'bear',
     color: '#c98b5e',
@@ -62,6 +89,29 @@ export function Landing() {
   })
   const { draft, update } = flow
   const plush = PLUSH_TYPES.find((p) => p.id === draft.plush)!
+
+  useEffect(() => {
+    const fromNav = sessionStorage.getItem('pg-scroll-bench') === '1'
+    if (!fromNav && !isBenchHash(location.hash)) return
+    if (fromNav) sessionStorage.removeItem('pg-scroll-bench')
+
+    let cancelled = false
+    let tries = 0
+    const tick = () => {
+      if (cancelled) return
+      const el = document.getElementById('bench')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+      if (tries++ < 30) window.setTimeout(tick, 50)
+    }
+    const t = window.setTimeout(tick, 50)
+    return () => {
+      cancelled = true
+      window.clearTimeout(t)
+    }
+  }, [location.hash, location.key])
 
   return (
     <div className="pg-theme v3">
@@ -138,7 +188,7 @@ export function Landing() {
               '🎂',
             ],
             [
-              'No reason. Just wanted you to have something soft today.',
+              'No reason. Just thinking of you today.',
               'just because',
               'Just because',
               '♡',
@@ -261,6 +311,7 @@ export function Landing() {
         draft={draft}
         open={flow.checkoutOpen}
         paying={flow.paying}
+        error={flow.error}
         onClose={flow.closeCheckout}
         onPay={flow.pay}
         title="Wrap & post"
@@ -270,9 +321,23 @@ export function Landing() {
 }
 
 export function Sent() {
-  const { gift, url, path, emailedTo, manageToken, loading } = useGiftById('cuddlepost')
+  const { gift, url, path, emailedTo, manageToken, loading, confirmingPayment } = useGiftById('cuddlepost')
   const [copied, setCopied] = useState(false)
-  if (loading) return <Opening />
+  if (loading || confirmingPayment) {
+    return (
+      <div className="pg-theme v3">
+        <Nav />
+        <main className="v3-sent">
+          <div className="v3-label">
+            <h1>{confirmingPayment ? 'Confirming your payment…' : 'Opening your parcel…'}</h1>
+            <p className="v3-hand v3-hand-sm">
+              {confirmingPayment ? 'Almost there. Creem is finishing the checkout.' : 'One moment.'}
+            </p>
+          </div>
+        </main>
+      </div>
+    )
+  }
   if (!gift) return <Missing />
 
   return (
@@ -299,6 +364,11 @@ export function Sent() {
             <dt>Via</dt>
             <dd>{emailedTo ? `Email to ${emailedTo}` : 'Private link & QR'}</dd>
           </dl>
+          {emailedTo && (
+            <p className="v3-hand v3-hand-sm" style={{ marginTop: '0.75rem' }}>
+              If it doesn't show up, ask them to peek in spam. Happens sometimes.
+            </p>
+          )}
           <div className="v3-label-link">
             <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
             <button type="button" className="v3-btn v3-btn-sm" onClick={async () => setCopied(await copyText(url))}>

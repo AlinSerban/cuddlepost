@@ -6,6 +6,7 @@ import { LegalDocument } from './core/legal/LegalDocument'
 import { ManageGiftPage } from './core/ui/ManageGift'
 import './core/ui/base.css'
 import './core/keepsake/keepsake.css'
+import './v3.css'
 
 const Landing = lazy(() => import('./index').then((m) => ({ default: m.Landing })))
 const Sent = lazy(() => import('./index').then((m) => ({ default: m.Sent })))

@@ -10,9 +10,6 @@ const matcher = new RegExpMatcher({
   ...englishRecommendedTransformers,
 })
 
-export const CONTENT_POLICY_HINT =
-  'Please keep names and messages kind. Hate speech, slurs and abusive language are not allowed.'
-
 export function textLooksClean(text: string): boolean {
   const t = text.trim()
   if (!t) return true

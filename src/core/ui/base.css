@@ -80,6 +80,17 @@ textarea {
   opacity: 0.8;
 }
 
+.pg-field-note {
+  margin: 0.15rem 0 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--pg-muted);
+  background: color-mix(in srgb, var(--pg-border) 35%, var(--pg-field-bg));
+  border: 1.5px dashed var(--pg-border);
+  border-radius: calc(var(--pg-radius) * 0.75);
+}
+
 .pg-field input,
 .pg-field textarea {
   width: 100%;

@@ -81,39 +81,74 @@ export function useGiftById(_brand: BrandId) {
   const [params] = useSearchParams()
   const [stored, setStored] = useState<StoredGift | null | undefined>(undefined)
   const [voiceSrc, setVoiceSrc] = useState<string | null>(null)
-
-  useEffect(() => {
-    let alive = true
-    setStored(undefined)
-    setVoiceSrc(null)
-    if (!id) {
-      setStored(null)
-      return
-    }
-    loadGift(id).then(async (g) => {
-      if (!alive) return
-      setStored(g)
-      if (g?.hasVoice && !isGiftExpired(g)) {
-        const url = await loadVoiceUrl(g)
-        if (alive) setVoiceSrc(url)
-      }
-    })
-    return () => {
-      alive = false
-    }
-  }, [id])
-
-  const gift: Gift | null | undefined =
-    stored === undefined ? undefined : stored ? toPublicGift(stored) : null
+  const [confirmingPayment, setConfirmingPayment] = useState(false)
 
   const manageFromUrl = params.get('manage')
+  const awaitingPayment = Boolean(manageFromUrl || params.get('checkout_id'))
+
   useEffect(() => {
     if (id && manageFromUrl) rememberManageToken(id, manageFromUrl)
   }, [id, manageFromUrl])
 
+  useEffect(() => {
+    let alive = true
+    let timer: ReturnType<typeof setTimeout> | undefined
+    setStored(undefined)
+    setVoiceSrc(null)
+    setConfirmingPayment(false)
+    if (!id) {
+      setStored(null)
+      return
+    }
+
+    const started = Date.now()
+    const poll = async () => {
+      try {
+        const g = await loadGift(id)
+        if (!alive) return
+        if (g) {
+          setStored(g)
+          setConfirmingPayment(false)
+          if (g.hasVoice && !isGiftExpired(g)) {
+            const url = await loadVoiceUrl(g)
+            if (alive) setVoiceSrc(url)
+          }
+          return
+        }
+        if (awaitingPayment && Date.now() - started < 45_000) {
+          setConfirmingPayment(true)
+          setStored(undefined)
+          timer = setTimeout(poll, 1500)
+          return
+        }
+        setStored(null)
+        setConfirmingPayment(false)
+      } catch {
+        if (!alive) return
+        if (awaitingPayment && Date.now() - started < 45_000) {
+          setConfirmingPayment(true)
+          timer = setTimeout(poll, 1500)
+          return
+        }
+        setStored(null)
+        setConfirmingPayment(false)
+      }
+    }
+
+    void poll()
+    return () => {
+      alive = false
+      if (timer) clearTimeout(timer)
+    }
+  }, [id, awaitingPayment])
+
+  const gift: Gift | null | undefined =
+    stored === undefined ? undefined : stored ? toPublicGift(stored) : null
+
   return {
     id,
     loading: stored === undefined,
+    confirmingPayment,
     gift,
     stored: stored ?? null,
     url: gift ? giftUrl(gift.id) : '',

@@ -10,14 +10,31 @@ export interface PaymentResult {
   provider: PaymentProvider
   /** When using a real MoR, redirect the browser here instead of creating the gift client-side. */
   checkoutUrl?: string
+  giftId?: string
+  manageToken?: string
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
+async function blobToBase64(blob: Blob): Promise<string> {
+  const buffer = await blob.arrayBuffer()
+  let binary = ''
+  const bytes = new Uint8Array(buffer)
+  bytes.forEach((b) => (binary += String.fromCharCode(b)))
+  return btoa(binary)
+}
+
+function functionsBase() {
+  return (
+    (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
+  )
+}
+
 /**
- * Checkout adapter. Today: stub that always succeeds after a short delay.
- * Tomorrow: Polar (primary) / Paddle / Creem — create a checkout session server-side,
- * redirect the buyer, then finalize the gift from a webhook with the service role key.
+ * Checkout adapter.
+ * - stub: fake success, client creates the gift
+ * - creem / others: Supabase Edge Function create-checkout → redirect; webhook finalizes
  */
 export async function processPayment(
   brand: BrandId,
@@ -34,31 +51,47 @@ export async function processPayment(
     }
   }
 
-  // Real providers need a Supabase Edge Function (or CF Worker) that creates the session.
-  const fn =
-    (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
-  const res = await fetch(`${fn}/create-checkout`, {
+  const voiceBase64 = draft.voice ? await blobToBase64(draft.voice) : null
+  const res = await fetch(`${functionsBase()}/create-checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
     },
     body: JSON.stringify({
       brand,
       amount: PRICE.amount,
       currency: PRICE.currency,
-      senderEmail: draft.senderEmail,
-      recipientName: draft.recipientName,
       provider,
+      plush: draft.plush,
+      color: draft.color,
+      patchColor: draft.patchColor,
+      patches: draft.patches,
+      senderName: draft.senderName,
+      recipientName: draft.recipientName,
+      message: draft.message,
+      occasion: draft.occasion,
+      senderEmail: draft.senderEmail,
+      recipientEmail: draft.recipientEmail,
+      delivery: draft.delivery,
+      voiceBase64,
+      voiceContentType: draft.voice?.type || 'audio/webm',
     }),
   })
   if (!res.ok) return { ok: false, paymentId: '', provider }
-  const data = (await res.json()) as { checkoutUrl: string; paymentId: string }
+  const data = (await res.json()) as {
+    checkoutUrl: string
+    paymentId: string
+    giftId?: string
+    manageToken?: string
+  }
   return {
     ok: true,
     paymentId: data.paymentId,
     provider,
     checkoutUrl: data.checkoutUrl,
+    giftId: data.giftId,
+    manageToken: data.manageToken,
   }
 }

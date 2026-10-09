@@ -38,7 +38,7 @@ export async function sendGiftEmail(payload: GiftEmailPayload): Promise<void> {
       : [
           `Hi ${payload.gift.recipientName},`,
           ``,
-          `${payload.gift.senderName} sent you something soft.`,
+          `${payload.gift.senderName} sent you a Cuddlepost.`,
           `Open your gift: ${payload.giftUrl}`,
           ``,
           `This link stays open for ${days} days.`,

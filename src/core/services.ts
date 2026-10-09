@@ -52,7 +52,10 @@ export async function checkoutAndCreateGift(
   if (!payment.ok) return { payment, gift: null }
 
   if (payment.checkoutUrl) {
-    // Gift is created later by the payment webhook — do not invent a paid gift here.
+    // Pending gift created by create-checkout Edge Function; creem-webhook marks paid.
+    if (payment.giftId && payment.manageToken) {
+      rememberManageToken(payment.giftId, payment.manageToken)
+    }
     window.location.assign(payment.checkoutUrl)
     return { payment, gift: null }
   }

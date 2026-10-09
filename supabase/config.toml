@@ -4,3 +4,9 @@ project_id = "cuddlepost"
 
 [functions.send-email]
 verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.creem-webhook]
+verify_jwt = false

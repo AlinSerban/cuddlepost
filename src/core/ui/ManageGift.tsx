@@ -15,7 +15,7 @@ export function ManageGiftPage({ themeClass, homePath = '/', btnClass = 'pg-pay-
   const [status, setStatus] = useState<'idle' | 'busy' | 'gone' | 'bad'>('idle')
 
   useEffect(() => {
-    document.title = 'Manage gift'
+    document.title = 'Manage gift · Cuddlepost'
     const meta = document.createElement('meta')
     meta.name = 'robots'
     meta.content = 'noindex, nofollow'
@@ -25,39 +25,73 @@ export function ManageGiftPage({ themeClass, homePath = '/', btnClass = 'pg-pay-
 
   return (
     <div className={`pg-theme ${themeClass}`}>
-      <main className="pg-legal">
-        <h1>Manage this gift</h1>
-        {status === 'gone' ? (
-          <>
-            <p>This gift has been deleted and will no longer open for anyone.</p>
-            <Link to={homePath}>Back home</Link>
-          </>
-        ) : (
-          <>
-            <p>
-              Gift id: <code>{id}</code>
-            </p>
-            <p>Deleting removes the page and any voice note. This cannot be undone.</p>
-            {status === 'bad' && <p className="pg-error">Could not delete. Check your manage link.</p>}
-            <button
-              type="button"
-              className={btnClass}
-              disabled={!token || status === 'busy'}
-              onClick={async () => {
-                setStatus('busy')
-                try {
-                  const ok = await deleteGift(id, token)
-                  setStatus(ok ? 'gone' : 'bad')
-                } catch (err) {
-                  console.error('[manage] delete failed', err)
-                  setStatus('bad')
-                }
-              }}
-            >
-              {status === 'busy' ? 'Deleting…' : 'Delete gift permanently'}
-            </button>
-          </>
-        )}
+      <nav className="v3-nav">
+        <Link to={homePath} className="v3-logo">
+          <span className="v3-stamp-logo">🧸</span>
+          <span>
+            Cuddlepost
+            <small>hugs by (very fast) post</small>
+          </span>
+        </Link>
+      </nav>
+      <main className="v3-sent">
+        <div className="v3-label">
+          {status === 'gone' ? (
+            <>
+              <span className="v3-hand">all gone</span>
+              <h1>Gift deleted</h1>
+              <p className="v3-hand v3-hand-sm">
+                This parcel will no longer open for anyone. Voice note gone too.
+              </p>
+              <div className="v3-actions">
+                <Link to={homePath} className="v3-btn">
+                  Back home
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="v3-hand">handle with care</span>
+              <h1>Manage this gift</h1>
+              <dl className="v3-label-rows">
+                <dt>Gift</dt>
+                <dd>
+                  <code style={{ fontSize: '0.85rem' }}>{id}</code>
+                </dd>
+                <dt>Note</dt>
+                <dd>Deleting removes the page and any voice note. This cannot be undone.</dd>
+              </dl>
+              {status === 'bad' && (
+                <p className="pg-error" style={{ marginTop: '1rem' }}>
+                  Could not delete. Check your manage link.
+                </p>
+              )}
+              <div className="v3-actions">
+                <button
+                  type="button"
+                  className={`${btnClass} v3-btn-ghost v3-btn-delete`.trim()}
+                  style={{ padding: '14px 26px', fontSize: 'inherit', fontWeight: 700 }}
+                  disabled={!token || status === 'busy'}
+                  onClick={async () => {
+                    setStatus('busy')
+                    try {
+                      const ok = await deleteGift(id, token)
+                      setStatus(ok ? 'gone' : 'bad')
+                    } catch (err) {
+                      console.error('[manage] delete failed', err)
+                      setStatus('bad')
+                    }
+                  }}
+                >
+                  {status === 'busy' ? 'Deleting…' : 'Delete gift permanently'}
+                </button>
+                <Link to={homePath} className="v3-btn v3-btn-ghost">
+                  Back home
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
       </main>
     </div>
   )

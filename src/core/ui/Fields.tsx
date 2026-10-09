@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { OCCASIONS, type GiftDraft } from '../gift'
-import { CONTENT_POLICY_HINT, findBlockedText, textLooksClean } from '../moderation'
+import { findBlockedText, textLooksClean } from '../moderation'
 import { voiceAllowed } from '../voiceGeo'
 import { VoiceRecorder } from './Voice'
 
@@ -83,13 +83,9 @@ export function MessageFields({ draft, update, withVoice = true }: { draft: Gift
           aria-invalid={messageDirty || undefined}
         />
       </label>
-      {contentError ? (
+      {contentError && (
         <p className="pg-error" style={{ margin: 0, fontSize: '0.85rem' }}>
           {contentError}
-        </p>
-      ) : (
-        <p className="pg-muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-          {CONTENT_POLICY_HINT}
         </p>
       )}
       {showVoice && (
@@ -98,10 +94,6 @@ export function MessageFields({ draft, update, withVoice = true }: { draft: Gift
             Voice note <em>optional · up to 60s</em>
           </span>
           <VoiceRecorder value={draft.voice} onChange={(voice) => update({ voice })} />
-          <p className="pg-muted" style={{ margin: '8px 0 0', fontSize: '0.8rem' }}>
-            Same kindness rules apply to voice. We can’t auto-check audio yet; recipients can use Report on the gift
-            page.
-          </p>
         </div>
       )}
       {withVoice && !voiceOk && (
@@ -136,15 +128,20 @@ export function DeliveryFields({ draft, update }: { draft: GiftDraft; update: Up
         </button>
       </div>
       {draft.delivery === 'email' && (
-        <label className="pg-field">
-          <span>Their email</span>
-          <input
-            type="email"
-            value={draft.recipientEmail}
-            placeholder="sam@example.com"
-            onChange={(e) => update({ recipientEmail: e.target.value })}
-          />
-        </label>
+        <>
+          <label className="pg-field">
+            <span>Their email</span>
+            <input
+              type="email"
+              value={draft.recipientEmail}
+              placeholder="sam@example.com"
+              onChange={(e) => update({ recipientEmail: e.target.value })}
+            />
+          </label>
+          <p className="pg-field-note">
+            Sometimes it ends up in spam, so maybe mention that when you tell them.
+          </p>
+        </>
       )}
       <label className="pg-field">
         <span>Your email (for the receipt & link)</span>
