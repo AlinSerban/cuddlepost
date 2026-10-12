@@ -188,7 +188,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   align-items: center;
+  width: 100%;
   max-width: 1180px;
+  min-width: 0;
   margin: 0 auto;
   padding: 50px clamp(16px, 5vw, 56px) 70px;
 }
@@ -218,6 +220,9 @@
   position: relative;
   display: grid;
   place-items: center;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
 }
 
 .v3-parcel-bg {
@@ -428,6 +433,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 36px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .v3-bench-preview {
@@ -435,10 +442,15 @@
   top: 20px;
   display: grid;
   gap: 20px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .v3-mat {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border-radius: 22px;
   background-color: #7f9e84;
   background-image: linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
@@ -697,6 +709,7 @@
 /* recipient */
 .v3-gift-intro {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-content: center;
   justify-items: center;
@@ -814,7 +827,9 @@
   gap: 30px;
   align-items: center;
   justify-items: center;
+  width: 100%;
   max-width: 1100px;
+  min-width: 0;
   margin: 0 auto;
   padding: 40px clamp(16px, 5vw, 56px) 70px;
   animation: v3-rise 0.9s ease;
@@ -828,10 +843,14 @@
   display: grid;
   justify-items: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .v3-gift-canvas {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: min(520px, 60vh);
 }
 
@@ -902,7 +921,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .v3-hero,
   .v3-bench-grid,
   .v3-gift-open {
