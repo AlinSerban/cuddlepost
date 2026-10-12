@@ -62,8 +62,6 @@ export function PlushViewer({
   const [taps, setTaps] = useState(0)
   const [prevBounce, setPrevBounce] = useState(bounceOn)
   const [bounces, setBounces] = useState(0)
-  // Bumped on orientation-like resizes so R3F remounts at the new size.
-  const [layoutEpoch, setLayoutEpoch] = useState(0)
   // Check sync so the first paint never mounts Canvas in broken WebViews.
   const [ok, setOk] = useState(webglOk)
 
@@ -80,33 +78,22 @@ export function PlushViewer({
   }, [ok])
 
   useEffect(() => {
-    let lastW = window.innerWidth
     let timer = 0
+    // Soft layout nudge only — do NOT remount Canvas (that loses WebGL and
+    // leaves the flat emoji fallback after DevTools / orientation resizes).
     const reflow = () => {
-      // Force a layout pass so grid tracks don't keep landscape pixel widths.
       void document.documentElement.offsetWidth
     }
-    const bumpCanvas = () => {
+    const onOrient = () => {
       window.clearTimeout(timer)
-      timer = window.setTimeout(() => {
-        reflow()
-        setLayoutEpoch((n) => n + 1)
-        lastW = window.innerWidth
-      }, 150)
-    }
-    const onOrient = () => bumpCanvas()
-    const onResize = () => {
-      reflow()
-      const w = window.innerWidth
-      if (Math.abs(w - lastW) >= 80) bumpCanvas()
-      else lastW = w
+      timer = window.setTimeout(reflow, 150)
     }
     window.addEventListener('orientationchange', onOrient)
-    window.addEventListener('resize', onResize)
+    window.addEventListener('resize', reflow)
     return () => {
       window.clearTimeout(timer)
       window.removeEventListener('orientationchange', onOrient)
-      window.removeEventListener('resize', onResize)
+      window.removeEventListener('resize', reflow)
     }
   }, [])
 
@@ -117,7 +104,6 @@ export function PlushViewer({
   return (
     <div className={className} style={{ touchAction: 'none', width: '100%', maxWidth: '100%', minWidth: 0 }}>
       <Canvas
-        key={layoutEpoch}
         shadows
         dpr={[1, 1.5]}
         camera={{ position: [0, 0.95, 5.5], fov: 34 }}
