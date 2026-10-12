@@ -302,7 +302,7 @@ export function Landing() {
       <footer className="v3-footer">
         <span>{BRAND} · made with care</span>
         <span>
-          post@cuddlepost.fun · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link> ·{' '}
+          Email: post@cuddlepost.fun · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link> ·{' '}
           <Link to="/refund">Refunds</Link>
         </span>
       </footer>
