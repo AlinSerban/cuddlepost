@@ -40,12 +40,20 @@ Deno.serve(async (req) => {
   const sb = createClient(supabaseUrl, serviceKey)
   const { data: gift, error } = await sb
     .from('gifts')
-    .select('id,status,deleted_at,has_voice,voice_path')
+    .select('id,status,deleted_at,has_voice,voice_path,expires_at')
     .eq('id', giftId)
     .maybeSingle()
 
   if (error) return json({ error: 'Lookup failed' }, 500)
-  if (!gift || gift.status !== 'paid' || gift.deleted_at || !gift.has_voice || !gift.voice_path) {
+  const expired = gift?.expires_at ? new Date(gift.expires_at).getTime() <= Date.now() : true
+  if (
+    !gift ||
+    gift.status !== 'paid' ||
+    gift.deleted_at ||
+    expired ||
+    !gift.has_voice ||
+    !gift.voice_path
+  ) {
     return json({ error: 'Voice not available' }, 404)
   }
 

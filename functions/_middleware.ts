@@ -34,12 +34,23 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   const anon = context.env.SUPABASE_ANON_KEY || context.env.VITE_SUPABASE_ANON_KEY
   if (supabaseUrl && anon) {
     try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/gifts?id=eq.${encodeURIComponent(id)}&select=sender_name,recipient_name,occasion,status&limit=1`, {
-        headers: { apikey: anon, Authorization: `Bearer ${anon}` },
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_gift`, {
+        method: 'POST',
+        headers: {
+          apikey: anon,
+          Authorization: `Bearer ${anon}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ p_id: id }),
       })
       if (res.ok) {
-        const rows = (await res.json()) as { sender_name?: string; recipient_name?: string; occasion?: string; status?: string }[]
-        const g = rows[0]
+        const rows = (await res.json()) as {
+          sender_name?: string
+          recipient_name?: string
+          occasion?: string
+          status?: string
+        }[]
+        const g = Array.isArray(rows) ? rows[0] : rows
         if (g && g.status !== 'deleted' && g.status !== 'reported') {
           title = `${g.sender_name || 'Someone'} sent you a ${BRAND.name}`
           description = `${g.occasion || 'Just because'} · a personalized plushie for ${g.recipient_name || 'you'}`

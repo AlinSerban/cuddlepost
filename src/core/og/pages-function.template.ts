@@ -31,22 +31,22 @@ export const onRequest: PagesFunction<{
 
   if (context.env.SUPABASE_URL && context.env.SUPABASE_ANON_KEY) {
     try {
-      const res = await fetch(
-        `${context.env.SUPABASE_URL}/rest/v1/gifts?id=eq.${encodeURIComponent(id)}&status=eq.paid&deleted_at=is.null&select=sender_name,recipient_name,occasion,plush`,
-        {
-          headers: {
-            apikey: context.env.SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${context.env.SUPABASE_ANON_KEY}`,
-          },
+      const res = await fetch(`${context.env.SUPABASE_URL}/rest/v1/rpc/get_gift`, {
+        method: 'POST',
+        headers: {
+          apikey: context.env.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${context.env.SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
         },
-      )
+        body: JSON.stringify({ p_id: id }),
+      })
       const rows = (await res.json()) as {
         sender_name: string
         recipient_name: string
         occasion: string
         plush: string
       }[]
-      const g = rows[0]
+      const g = Array.isArray(rows) ? rows[0] : rows
       if (g) {
         title = `${g.sender_name} sent you a ${brand}`
         description = `${g.occasion} · a personalized ${g.plush} for ${g.recipient_name}`

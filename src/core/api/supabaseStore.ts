@@ -99,16 +99,12 @@ export function createSupabaseStore(): GiftStore {
     },
 
     async getGift(id) {
-      const { data, error } = await sb
-        .from('gifts_public')
-        .select(
-          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,delivery,status,created_at,expires_at,deleted_at',
-        )
-        .eq('id', id)
-        .maybeSingle()
+      // RPC returns at most one non-expired paid gift (no public table/view listing).
+      const { data, error } = await sb.rpc('get_gift', { p_id: id })
       if (error) throw error
-      if (!data) return null
-      return publicRowToGift(data as PublicGiftRow)
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row) return null
+      return publicRowToGift(row as PublicGiftRow)
     },
 
     async getVoiceUrl(gift) {
