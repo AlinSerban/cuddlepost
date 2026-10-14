@@ -1,5 +1,6 @@
 // Supabase Edge Function: send transactional mail via Resend.
 // Secrets: RESEND_API_KEY, optional EMAIL_FROM (defaults to post@cuddlepost.fun)
+// Only callable with the service_role key (not the public anon key).
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -12,7 +13,9 @@ Deno.serve(async (req) => {
   }
 
   const auth = req.headers.get('Authorization') || ''
-  if (!auth.startsWith('Bearer ')) {
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : ''
+  if (!serviceKey || !token || token !== serviceKey) {
     return json({ error: 'Unauthorized' }, 401)
   }
 

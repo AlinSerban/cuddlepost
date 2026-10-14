@@ -1,9 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { draftToGift, giftExpiresAt, newGiftId } from '../gift'
+import { giftExpiresAt } from '../gift'
 import type { FinalizePaymentInput, GiftStore, StoredGift } from './types'
-import { newManageToken } from './types'
 
-interface GiftRow {
+interface PublicGiftRow {
   id: string
   brand: StoredGift['brand']
   plush: StoredGift['plush']
@@ -15,20 +14,14 @@ interface GiftRow {
   message: string
   occasion: string
   has_voice: boolean
-  voice_path: string | null
-  sender_email: string
-  recipient_email: string | null
   delivery: 'link' | 'email'
-  payment_id: string | null
-  payment_provider: string
-  manage_token: string
   status: StoredGift['status']
   created_at: string
   expires_at: string | null
   deleted_at: string | null
 }
 
-function rowToGift(row: GiftRow): StoredGift {
+function publicRowToGift(row: PublicGiftRow): StoredGift {
   const createdAt = new Date(row.created_at).getTime()
   return {
     id: row.id,
@@ -42,13 +35,13 @@ function rowToGift(row: GiftRow): StoredGift {
     message: row.message,
     occasion: row.occasion,
     hasVoice: row.has_voice,
-    voicePath: row.voice_path,
-    senderEmail: row.sender_email,
-    recipientEmail: row.recipient_email || '',
+    voicePath: null,
+    senderEmail: '',
+    recipientEmail: '',
     delivery: row.delivery,
-    paymentId: row.payment_id || '',
-    paymentProvider: row.payment_provider,
-    manageToken: row.manage_token,
+    paymentId: '',
+    paymentProvider: '',
+    manageToken: '',
     status: row.status,
     createdAt,
     expiresAt: row.expires_at ? new Date(row.expires_at).getTime() : giftExpiresAt(createdAt),
@@ -65,23 +58,27 @@ function client(): SupabaseClient {
   return createClient(url, key)
 }
 
+function functionsBase() {
+  return (
+    (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
+  )
+}
+
 /**
- * Browser client for reading gifts. Writes (finalize, voice upload, delete with token)
- * should go through Edge Functions with the service role once you deploy them.
- * Until then, this store uses the anon key with a temporary insert policy OR
- * falls back if the function URL is set.
+ * Browser client for public gift reads + token RPCs.
+ * Paid writes go through create-checkout / creem-webhook (service role).
  */
 export function createSupabaseStore(): GiftStore {
-  const fnBase = (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) || ''
   const sb = client()
 
   async function callFunction<T>(name: string, body: unknown): Promise<T> {
-    const url = `${fnBase || import.meta.env.VITE_SUPABASE_URL + '/functions/v1'}/${name}`
-    const res = await fetch(url, {
+    const res = await fetch(`${functionsBase()}/${name}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
       },
       body: JSON.stringify(body),
     })
@@ -95,177 +92,64 @@ export function createSupabaseStore(): GiftStore {
   return {
     mode: 'supabase',
 
-    async finalizePaidGift(input: FinalizePaymentInput) {
-      // Prefer Edge Function (service role + storage). Dev fallback: direct insert if RLS allows.
-      if (fnBase || import.meta.env.VITE_SUPABASE_URL) {
-        try {
-          const voiceBase64 = input.draft.voice ? await blobToBase64(input.draft.voice) : null
-          return await callFunction<StoredGift>('finalize-gift', {
-            ...input,
-            draft: { ...input.draft, voice: undefined },
-            voiceBase64,
-            voiceContentType: input.draft.voice?.type || 'audio/webm',
-          })
-        } catch (err) {
-          console.warn('[supabase] finalize-gift function unavailable, trying direct insert', err)
-        }
-      }
-
-      const id = newGiftId()
-      const gift = draftToGift(input.draft, id, input.brand)
-      const manageToken = newManageToken()
-      let voicePath: string | null = null
-      let hasVoice = false
-
-      if (input.draft.voice) {
-        voicePath = `${input.brand}/${id}.webm`
-        const { error: upErr } = await sb.storage.from('gift-voices').upload(voicePath, input.draft.voice, {
-          contentType: input.draft.voice.type || 'audio/webm',
-          upsert: true,
-        })
-        if (!upErr) hasVoice = true
-        else {
-          console.warn('[supabase] voice upload failed', upErr)
-          voicePath = null
-        }
-      }
-
-      const row = {
-        id,
-        brand: input.brand,
-        plush: gift.plush,
-        color: gift.color,
-        patch_color: gift.patchColor,
-        patches: gift.patches,
-        sender_name: gift.senderName,
-        recipient_name: gift.recipientName,
-        message: gift.message,
-        occasion: gift.occasion,
-        has_voice: hasVoice,
-        voice_path: voicePath,
-        sender_email: input.draft.senderEmail.trim(),
-        recipient_email: input.draft.recipientEmail.trim() || null,
-        delivery: input.draft.delivery,
-        payment_id: input.paymentId,
-        payment_provider: input.paymentProvider,
-        manage_token: manageToken,
-        status: 'paid' as const,
-        expires_at: new Date(gift.expiresAt).toISOString(),
-      }
-
-      const { data, error } = await sb.from('gifts').insert(row).select('*').single()
-      if (error) throw error
-      return rowToGift(data as GiftRow)
+    async finalizePaidGift(_input: FinalizePaymentInput): Promise<StoredGift> {
+      // Live Creem path never reaches here (redirect + webhook).
+      // Direct anon inserts are disabled — refuse instead of opening a free-gift hole.
+      throw new Error('Direct gift create is disabled. Use Creem checkout.')
     },
 
     async getGift(id) {
-      // Omit manage_token / emails from public reads (token only via receipt / ?manage=)
       const { data, error } = await sb
-        .from('gifts')
+        .from('gifts_public')
         .select(
-          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,voice_path,delivery,payment_id,payment_provider,status,created_at,expires_at,deleted_at',
+          'id,brand,plush,color,patch_color,patches,sender_name,recipient_name,message,occasion,has_voice,delivery,status,created_at,expires_at,deleted_at',
         )
         .eq('id', id)
-        .eq('status', 'paid')
-        .is('deleted_at', null)
         .maybeSingle()
       if (error) throw error
       if (!data) return null
-      return rowToGift({
-        ...(data as Omit<GiftRow, 'manage_token' | 'sender_email' | 'recipient_email'>),
-        manage_token: '',
-        sender_email: '',
-        recipient_email: null,
-      })
+      return publicRowToGift(data as PublicGiftRow)
     },
 
     async getVoiceUrl(gift) {
-      if (!gift.voicePath) return null
-      const { data, error } = await sb.storage.from('gift-voices').createSignedUrl(gift.voicePath, 3600)
-      if (error) {
-        console.warn('[supabase] signed voice url failed', error)
+      if (!gift.hasVoice) return null
+      try {
+        const data = await callFunction<{ url?: string }>('get-voice-url', { giftId: gift.id })
+        return data.url || null
+      } catch (err) {
+        console.warn('[supabase] get-voice-url failed', err)
         return null
       }
-      return data.signedUrl
     },
 
     async reportGift(id, reason, details) {
+      try {
+        await callFunction('report-gift', {
+          giftId: id,
+          reason,
+          details: details || undefined,
+        })
+        return
+      } catch (err) {
+        console.warn('[supabase] report-gift function unavailable, trying rpc', err)
+      }
+
       const { data: rpcOk, error: rpcErr } = await sb.rpc('report_gift', {
         p_id: id,
         p_reason: reason,
         p_details: details || null,
       })
-      if (rpcErr) {
-        console.warn('[supabase] report_gift rpc unavailable, trying direct insert', rpcErr.message)
-        const { error } = await sb.from('gift_reports').insert({ gift_id: id, reason, details: details || null })
-        if (error) throw error
-        const { error: upErr } = await sb.from('gifts').update({ status: 'reported' }).eq('id', id).eq('status', 'paid')
-        if (upErr) console.warn('[supabase] could not mark gift reported', upErr.message)
-      } else if (!rpcOk) {
-        throw new Error('Gift not found or already removed')
-      }
-
-      // Notify support inbox (best-effort; report already saved)
-      try {
-        const fnBase =
-          (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
-        if (import.meta.env.VITE_EMAIL_ENABLED === 'true' && fnBase) {
-          await fetch(`${fnBase}/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({
-              to: 'post@cuddlepost.fun',
-              subject: `Gift reported · ${id}`,
-              body: [
-                `A gift was reported on Cuddlepost.`,
-                ``,
-                `Gift id: ${id}`,
-                `Reason: ${reason}`,
-                details ? `Details: ${details}` : '',
-                `Open (if still visible): ${typeof window !== 'undefined' ? window.location.origin : ''}/gift/${id}`,
-              ]
-                .filter(Boolean)
-                .join('\n'),
-              from: 'post@cuddlepost.fun',
-              kind: 'report',
-            }),
-          })
-        }
-      } catch (err) {
-        console.warn('[supabase] report email notify failed', err)
-      }
+      if (rpcErr) throw rpcErr
+      if (!rpcOk) throw new Error('Gift not found or already removed')
     },
 
     async deleteGift(id, manageToken) {
-      // Prefer SECURITY DEFINER RPC (see migration 003) — avoids anon UPDATE RLS issues.
       const { data: rpcOk, error: rpcErr } = await sb.rpc('delete_gift', {
         p_id: id,
         p_token: manageToken,
       })
-      if (!rpcErr) return Boolean(rpcOk)
-
-      // Fallback: direct update (needs UPDATE policy WITH CHECK allowing status=deleted)
-      console.warn('[supabase] delete_gift rpc unavailable, trying direct update', rpcErr.message)
-      const { error } = await sb
-        .from('gifts')
-        .update({ status: 'deleted', deleted_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('manage_token', manageToken)
-      if (error) throw error
-      const still = await this.getGift(id)
-      return still === null
+      if (rpcErr) throw rpcErr
+      return Boolean(rpcOk)
     },
   }
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer()
-  let binary = ''
-  const bytes = new Uint8Array(buffer)
-  bytes.forEach((b) => (binary += String.fromCharCode(b)))
-  return btoa(binary)
 }

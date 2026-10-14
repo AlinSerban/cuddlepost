@@ -13,8 +13,9 @@ export interface GiftEmailPayload {
 }
 
 /**
- * Calls Supabase Edge Function `send-email` when VITE_EMAIL_ENABLED=true.
- * Resend API key lives only on the server.
+ * Client-side email helper. Live Creem receipts / gift mails are sent by
+ * creem-webhook (Resend + service role). The send-email Edge Function is locked
+ * to service_role and must not be called from the browser.
  */
 export async function sendGiftEmail(payload: GiftEmailPayload): Promise<void> {
   const brand = BRANDS[payload.brand]
@@ -43,36 +44,6 @@ export async function sendGiftEmail(payload: GiftEmailPayload): Promise<void> {
           ``,
           `This link stays open for ${days} days.`,
         ].join('\n')
-
-  const fnBase =
-    (import.meta.env.VITE_SUPABASE_FUNCTIONS_URL as string | undefined) ||
-    (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1` : '')
-
-  if (fnBase && import.meta.env.VITE_EMAIL_ENABLED === 'true') {
-    const res = await fetch(`${fnBase}/send-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({
-        kind: payload.kind,
-        brand: payload.brand,
-        to: payload.to,
-        subject,
-        body,
-        from: brand.supportEmail,
-        giftUrl: payload.giftUrl,
-        manageUrl: payload.manageUrl,
-      }),
-    })
-    if (!res.ok) {
-      const text = await res.text().catch(() => '')
-      console.error('[email] send-email failed', res.status, text)
-      throw new Error('Could not send email')
-    }
-    return
-  }
 
   await new Promise((r) => setTimeout(r, 200))
   console.info(`[email:${payload.kind}] to=${payload.to}\n${subject}\n${body}`)
