@@ -1,0 +1,56 @@
+# Keeps the free Supabase project from being paused for inactivity: every 3 days it makes one read-only database
+# call (get_gift with a dummy id, which returns nothing and changes nothing).
+# No secrets: the Supabase URL and the public anon key are read from the live site's own JavaScript, where every
+# visitor already receives them. Nothing is printed except status codes.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 9 */3 * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/supabase-keepalive.yml"]
+
+permissions:
+  actions: write # only to keep this scheduled job enabled (GitHub turns schedules off after 60 days without commits)
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase
+        run: |
+          python3 - <<'EOF'
+          import base64, json, re, urllib.request
+          def get(u):
+              req = urllib.request.Request(u, headers={"User-Agent": "cuddlepost-keepalive"})
+              return urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
+          html = get("https://cuddlepost.fun/")
+          url = key = None
+          for s in re.findall(r'src="(/assets/[^"]+\.js)"', html):
+              js = get("https://cuddlepost.fun" + s)
+              u = re.search(r"https://[a-z0-9]+\.supabase\.co", js)
+              for k in re.findall(r"eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", js):
+                  if '"role":"anon"' in base64.urlsafe_b64decode(k.split(".")[1] + "==").decode("utf-8", "replace"):
+                      key = k
+                      break
+              if u and key:
+                  url = u.group(0)
+                  break
+          if not (url and key):
+              raise SystemExit("could not find the public Supabase config on cuddlepost.fun")
+          req = urllib.request.Request(url + "/rest/v1/rpc/get_gift", data=json.dumps({"p_id": "keepalive-ping"}).encode(), method="POST",
+                                       headers={"apikey": key, "Authorization": "Bearer " + key, "Content-Type": "application/json"})
+          r = urllib.request.urlopen(req, timeout=30)
+          print("get_gift status:", r.status)
+          EOF
+      - name: Keep this schedule enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -s -o /dev/null -w "enable: %{http_code}\n" -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/supabase-keepalive.yml/enable"
