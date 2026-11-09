@@ -1,12 +1,13 @@
-# Keeps the free Supabase project from being paused for inactivity: every 3 days it makes one read-only database
-# call (get_gift with a dummy id, which returns nothing and changes nothing).
+# Keeps the free Supabase project from being paused for inactivity: every day it makes two read-only requests,
+# a database call (get_gift with a dummy id, which returns nothing and changes nothing) and the auth service's
+# health check. A run fails (red) if the project does not answer, for example while it is paused.
 # No secrets: the Supabase URL and the public anon key are read from the live site's own JavaScript, where every
 # visitor already receives them. Nothing is printed except status codes.
 name: Supabase keep-alive
 
 on:
   schedule:
-    - cron: "17 9 */3 * *"
+    - cron: "17 9 * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -46,6 +47,8 @@ jobs:
                                        headers={"apikey": key, "Authorization": "Bearer " + key, "Content-Type": "application/json"})
           r = urllib.request.urlopen(req, timeout=30)
           print("get_gift status:", r.status)
+          req = urllib.request.Request(url + "/auth/v1/health", headers={"apikey": key, "Authorization": "Bearer " + key})
+          print("auth health status:", urllib.request.urlopen(req, timeout=30).status)
           EOF
       - name: Keep this schedule enabled
         env:
